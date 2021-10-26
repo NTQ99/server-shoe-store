@@ -7,13 +7,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import shoe.store.server.models.Role;
 import shoe.store.server.models.User;
+import shoe.store.server.repositories.RoleRepository;
 import shoe.store.server.repositories.UserRepository;
 
 @Service("userService")
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     public User createUser(User user) {
         return userRepository.save(user);
@@ -23,8 +28,12 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
-    public User getUserByUsername(String code) {
-        return userRepository.findByUsername(code);
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public Page<User> findUserByUsername(String username, Pageable pagging) {
+        return userRepository.findByUsernameContaining(username, pagging);
     }
 
     public Page<User> getAllUsers(Pageable paging) {
@@ -63,6 +72,10 @@ public class UserService {
 
     public void deleteAllUsers() {
         userRepository.deleteAll();
+    }
+
+    public Role getRoleByName(Role.ERole roleName) {
+        return roleRepository.findByName(roleName).orElse(null);
     }
 
 }
