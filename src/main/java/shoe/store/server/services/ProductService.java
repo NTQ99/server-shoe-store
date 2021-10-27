@@ -28,15 +28,8 @@ public class ProductService {
         return productRepository.findByProductCode(code);
     }
 
-    public Product getProductByName(String userId, String name) {
-        List<Product> products = productRepository.findByUserId(userId);
-        products = products.stream().filter(product -> product.getProductName().equals(name))
-                .collect(Collectors.toList());
-        if (products.isEmpty()) {
-            return null;
-        }
-
-        return products.get(0);
+    public Product getProductByName(String name) {
+        return productRepository.findOneByProductName(name);
     }
 
     public Page<Product> findProductByName(String name, Pageable paging) {

@@ -46,36 +46,27 @@ public class ProductController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestHeader("Authorization") String jwt, @RequestBody Product productData) {
+    public ResponseEntity<?> create(@RequestBody Product productData) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-        
-        Product currProductData = service.getProductByName(userId, productData.getProductName());
+        Product currProductData = service.getProductByName(productData.getProductName());
 
         if (currProductData != null) {
             throw new GlobalException(ErrorMessage.StatusCode.EXIST.message);
         }
 
-        productData.setUserId(userId);
         BasePageResponse<Product> response = new BasePageResponse<>(service.createProduct(productData), ErrorMessage.StatusCode.CREATED.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
 
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<?> update(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id,
+    public ResponseEntity<?> update(@PathVariable("id") String id,
             @RequestBody Product newProductData) {
-
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
 
         Product currProductData = service.getProductById(id);
 
         if (currProductData == null) {
             throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
-        }
-        
-        if (!currProductData.validateUser(userId)) {
-            throw new GlobalException(ErrorMessage.StatusCode.UNAUTHORIZED.message);
         }
 
         BasePageResponse<Product> response = new BasePageResponse<>(service.updateProduct(currProductData, newProductData), ErrorMessage.StatusCode.MODIFIED.message);
@@ -84,18 +75,12 @@ public class ProductController {
     }
 
     @PostMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id) {
-
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
+    public ResponseEntity<?> delete(@PathVariable("id") String id) {
 
         Product currDeliveryData = service.getProductById(id);
 
         if (currDeliveryData == null) {
             throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
-        }
-        
-        if (!currDeliveryData.validateUser(userId)) {
-            throw new GlobalException(ErrorMessage.StatusCode.UNAUTHORIZED.message);
         }
 
         service.deleteProduct(id);
