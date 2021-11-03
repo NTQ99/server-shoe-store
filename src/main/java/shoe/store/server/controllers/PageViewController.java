@@ -38,30 +38,32 @@ public class PageViewController {
     @Value("${max.card.display.on.pagination.tray}")
     private int maxPaginationTraySize;
 
-    @GetMapping("/")
+    @GetMapping("/home")
     public ModelAndView home(@RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
             @RequestParam(value = "size", defaultValue = "4", required = false) Integer size,
             HttpServletRequest request, HttpServletResponse response) {
 
         Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("jwt")) {
-                String jwt = cookie.getValue();
-                String id = jwtUtils.getIdFromJwtToken(jwt.substring(9, jwt.length()));
-		        User currUserData = service.getUserById(id);
-                Role adminRole = service.getRoleByName(Role.ERole.ROLE_ADMIN);
-                if (currUserData.getRoles().contains(adminRole)) {
-                    ModelAndView modelAndView = new ModelAndView();
-                    modelAndView.setViewName("home");
-                    Page<User> allUsers = service.getAllUsers(PageRequest.of(page, size, Sort.by("username")));
-                    modelAndView.addObject("allUsers", allUsers);
-                    modelAndView.addObject("maxTraySize", size);
-                    modelAndView.addObject("currentPage", page);
-                    return modelAndView;
-                } else {
-                    return new ModelAndView("redirect:/403");
-                }
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("jwt")) {
+                    String jwt = cookie.getValue();
+                    String id = jwtUtils.getIdFromJwtToken(jwt.substring(9, jwt.length()));
+                    User currUserData = service.getUserById(id);
+                    Role adminRole = service.getRoleByName(Role.ERole.ROLE_ADMIN);
+                    if (currUserData.getRoles().contains(adminRole)) {
+                        ModelAndView modelAndView = new ModelAndView();
+                        modelAndView.setViewName("home");
+                        Page<User> allUsers = service.getAllUsers(PageRequest.of(page, size, Sort.by("username")));
+                        modelAndView.addObject("allUsers", allUsers);
+                        modelAndView.addObject("maxTraySize", size);
+                        modelAndView.addObject("currentPage", page);
+                        return modelAndView;
+                    } else {
+                        return new ModelAndView("redirect:/403");
+                    }
 
+                }
             }
         }
 
@@ -123,9 +125,11 @@ public class PageViewController {
     @GetMapping("/login")
     public ModelAndView login(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("jwt")) {
-                return new ModelAndView("redirect:/");
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("jwt")) {
+                    return new ModelAndView("redirect:/home");
+                }
             }
         }
         ModelAndView modelAndView = new ModelAndView();
@@ -135,7 +139,7 @@ public class PageViewController {
 
     @PostMapping("/register")
     public String register(@ModelAttribute User user) {
-        String result = "redirect:/";
+        String result = "redirect:/home";
         User dbUser = service.getUserByUsername(user.getUsername());
         if (user.getFirstName() == null || user.getFirstName().trim().isEmpty()) {
             result = "redirect:/addNewUser?error=Enter valid fist name";
@@ -160,7 +164,7 @@ public class PageViewController {
     @GetMapping("/delete/{userId}")
     public String delete(@PathVariable String userId) {
         service.deleteUser(userId);
-        return "redirect:/";
+        return "redirect:/home";
     }
 
     @ResponseBody

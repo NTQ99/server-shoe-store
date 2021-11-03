@@ -37,7 +37,7 @@ public class OrderService {
 
         int totalPrice = 0;
         for (Order.Item item : orderData.getProducts()) {
-            Product product = productService.getProductByName(orderData.getUserId(), item.getProductName());
+            Product product = productService.getProductByName(item.getProductName());
             if (product == null) {
                 throw new GlobalException("not found product with name: " + item.getProductName());
             } else item.setProductId(product.getId());
@@ -146,7 +146,7 @@ public class OrderService {
 
         for (Order.Item item : newOrderData.getProducts()) {
             if (item.getProductId() == null) {
-                Product product = productService.getProductByName(orderData.getUserId(), item.getProductName());
+                Product product = productService.getProductByName(item.getProductName());
                 if (product == null) {
                     throw new GlobalException("not found product with name: " + item.getProductName());
                 } else item.setProductId(product.getId());

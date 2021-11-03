@@ -33,13 +33,10 @@ public class ProductController {
     }
 
     @PostMapping("/get/{id}")
-    public ResponseEntity<?> getById(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id) {
-
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
+    public ResponseEntity<?> getById(@PathVariable("id") String id) {
 
         Product product = service.getProductById(id);
-
-        if (!product.validateUser(userId)) throw new GlobalException(ErrorMessage.StatusCode.UNAUTHORIZED.message);
+        if (product == null) product = service.getProductByCode(id);
 
         return new ResponseEntity<>(new BasePageResponse<>(product, ErrorMessage.StatusCode.OK.message), HttpStatus.OK);
 
