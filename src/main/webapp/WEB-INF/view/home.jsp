@@ -110,16 +110,16 @@
                         </c:if>
                         <c:if test="${allUsers.totalPages > 0}">
                             <li class='page-item <c:if test="${empty param.page || param.page eq 0}">disabled</c:if>'>
-                                <a class="page-link" href="/?page=${prev}&size=${maxTraySize}">Prev</a></li>
+                                <a class="page-link" href="/home?page=${prev}&size=${maxTraySize}">Prev</a></li>
                         </c:if>
                         <c:forEach var="i" begin="0" end="${allUsers.totalPages -1}">
                             <li class='page-item <c:if test="${param.page eq i || (empty param.page && i eq 0)}">active</c:if>'>
-                                <a class="page-link" href="/?page=${i}&size=${maxTraySize}">${i+1}</a>
+                                <a class="page-link" href="/home?page=${i}&size=${maxTraySize}">${i+1}</a>
                             </li>
                         </c:forEach>
                         <c:if test="${allUsers.totalPages > 0}">
                             <li class='page-item <c:if test="${allUsers.totalPages <= (param.page + 1)}">disabled</c:if>'>
-                                <a class="page-link" href="/?page=${param.page + 1}&size=${maxTraySize}">Next</a>
+                                <a class="page-link" href="/home?page=${param.page + 1}&size=${maxTraySize}">Next</a>
                             </li>
                         </c:if>
                     </ul>

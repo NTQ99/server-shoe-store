@@ -19,7 +19,7 @@ public class Delivery {
         private String name; // Tên của sản phẩm.
         private String code; // Mã của sản phẩm.
         private int quantity; // Số lượng của sản phẩm.
-        private int price; // Giá của sản phẩm.
+        private double price; // Giá của sản phẩm.
     }
 
     private String deliveryUnitName;//  #
@@ -54,7 +54,7 @@ public class Delivery {
         for (int i = 0; i < products.size(); i ++) {
             Product product = products.get(i);
             Order.Item productOrder = order.getProducts().get(i);
-            Item item = new Item(product.getProductName(), product.getProductCode(), productOrder.getQuantity(), product.getPrice()[order.getPriceType()]);
+            Item item = new Item(product.getProductName(), product.getProductCode(), productOrder.getQuantity(), product.getPrice());
             tmpItems.add(item);
             totalWeight += productOrder.getQuantity() * product.getWeight();
         }

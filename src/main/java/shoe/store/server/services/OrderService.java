@@ -41,7 +41,7 @@ public class OrderService {
             if (product == null) {
                 throw new GlobalException("not found product with name: " + item.getProductName());
             } else item.setProductId(product.getId());
-            totalPrice += product.getPrice()[orderData.getPriceType()] *item.getQuantity();
+            totalPrice += product.getPrice()*item.getQuantity();
         }
 
         Customer customerData = customerService.getCustomerByPhone(orderData.getUserId(), orderData.getCustomerPhone());

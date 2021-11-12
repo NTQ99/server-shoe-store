@@ -19,11 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import shoe.store.server.repositories.UserRepository;
-import shoe.store.server.repositories.RoleRepository;
-
 import shoe.store.server.security.jwt.*;
 import shoe.store.server.security.services.*;
+import shoe.store.server.services.UserService;
 import shoe.store.server.exceptions.GlobalException;
 import shoe.store.server.models.Role;
 import shoe.store.server.models.User;
@@ -39,10 +37,7 @@ public class AuthController {
 	private AuthenticationManager authenticationManager;
 
 	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private RoleRepository roleRepository;
+	private UserService userService;
 
 	@Autowired
 	private PasswordEncoder encoder;
@@ -80,7 +75,7 @@ public class AuthController {
 
 	@PostMapping("/register")
 	public ResponseEntity<BasePageResponse<?>> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
-		if (userRepository.existsByUsername(registerRequest.getUsername())) {
+		if (userService.checkUserExists(registerRequest.getUsername())) {
 			throw new GlobalException(ErrorMessage.StatusCode.USER_EXIST.message);
 		}
 
@@ -92,18 +87,18 @@ public class AuthController {
 		String registerRole = registerRequest.getRoleKey();
 
 		Role userRole;
-		if (registerRole == null) {
-			userRole = roleRepository.findByName(Role.ERole.ROLE_BUYER)
-					.orElseThrow(() -> new GlobalException("Quyền không tồn tại!"));
+		if (registerRole == null || registerRole == "") {
+			userRole = userService.getRoleByName(Role.ERole.ROLE_BUYER);
+			if (userRole == null) throw new GlobalException("Quyền không tồn tại!");
 		} else {
-			switch (registerRequest.getRoleKey()) {
+			switch (registerRole) {
 				case "admin":
-					userRole = roleRepository.findByName(Role.ERole.ROLE_ADMIN)
-							.orElseThrow(() -> new GlobalException("Quyền không tồn tại!"));
+					userRole = userService.getRoleByName(Role.ERole.ROLE_ADMIN);
+					if (userRole == null) throw new GlobalException("Quyền không tồn tại!");
 					break;
 				case "seller":
-					userRole = roleRepository.findByName(Role.ERole.ROLE_SELLER)
-							.orElseThrow(() -> new GlobalException("Quyền không tồn tại!"));
+					userRole = userService.getRoleByName(Role.ERole.ROLE_SELLER);
+					if (userRole == null) throw new GlobalException("Quyền không tồn tại!");
 					break;
 				default:
 					throw new GlobalException("Role Key không hợp lệ!");
@@ -118,7 +113,7 @@ public class AuthController {
         user.setPhone(registerRequest.getPhone());
         user.setAddress(registerRequest.getAddress());
 
-		userRepository.save(user);
+		userService.createUser(user);
 
 		BasePageResponse<?> response = new BasePageResponse<>(null, ErrorMessage.StatusCode.USER_CREATED.message);
 

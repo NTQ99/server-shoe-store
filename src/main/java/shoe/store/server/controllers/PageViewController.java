@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -16,8 +17,12 @@ import shoe.store.server.models.Role;
 import shoe.store.server.models.User;
 import shoe.store.server.payload.BasePageResponse;
 import shoe.store.server.payload.ErrorMessage;
+import shoe.store.server.payload.request.RegisterRequest;
 import shoe.store.server.security.jwt.JwtUtils;
 import shoe.store.server.services.UserService;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -31,6 +36,9 @@ public class PageViewController {
 
     @Autowired
 	private JwtUtils jwtUtils;
+
+    @Autowired
+	private PasswordEncoder encoder;
 
     @Value("${max.result.per.page}")
     private int maxResults;
@@ -138,22 +146,47 @@ public class PageViewController {
     }
 
     @PostMapping("/register")
-    public String register(@ModelAttribute User user) {
+    public String register(@ModelAttribute RegisterRequest request) {
         String result = "redirect:/home";
-        User dbUser = service.getUserByUsername(user.getUsername());
-        if (user.getFirstName() == null || user.getFirstName().trim().isEmpty()) {
+        User dbUser = service.getUserByUsername(request.getUsername());
+        if (request.getFirstName() == null || request.getFirstName().trim().isEmpty()) {
             result = "redirect:/addNewUser?error=Enter valid fist name";
-        } else if (user.getLastName() == null || user.getLastName().trim().isEmpty()) {
+        } else if (request.getLastName() == null || request.getLastName().trim().isEmpty()) {
             result = "redirect:/addNewUser?error=Enter valid last name";
-        } else if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+        } else if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
             result = "redirect:/addNewUser?error=Enter valid email";
-        } else if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+        } else if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
             result = "redirect:/addNewUser?error=Enter valid password";
-        } else if (user.getRoles() == null) {
-            result = "redirect:/addNewUser?error=Select a valid Role";
         }
         if (dbUser == null) {
-            service.createUser(user);
+            dbUser = new User(request.getUsername(),encoder.encode(request.getPassword()));
+            dbUser.setFirstName(request.getFirstName());
+            dbUser.setLastName(request.getLastName());
+            dbUser.setEmail(request.getEmail());
+            dbUser.setPhone(request.getPhone());
+            
+            Set<Role> roles = new HashSet<>();
+            
+            String registerRole = request.getRoleKey();
+            
+            Role userRole = new Role();
+            if (registerRole == null || registerRole == "") {
+                userRole = service.getRoleByName(Role.ERole.ROLE_BUYER);
+            } else {
+                switch (registerRole) {
+                    case "admin":
+                        userRole = service.getRoleByName(Role.ERole.ROLE_ADMIN);
+                        break;
+                    case "seller":
+                        userRole = service.getRoleByName(Role.ERole.ROLE_SELLER);
+                        break;
+                    default:
+                        result = "redirect:/addNewUser?error=Select a valid Role";
+                    }
+            }
+            roles.add(userRole);
+            dbUser.setRoles(roles);
+            service.createUser(dbUser);
         } else {
             result = "redirect:/addNewUser?error=User Already Exists!";
         }

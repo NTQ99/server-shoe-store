@@ -2,6 +2,9 @@ package shoe.store.server.models;
 
 import java.util.List;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,12 +19,19 @@ public class Product {
     @Id
     private String id;
 
-    private String userId;
+    private boolean productStatus;
     private String productCode;
     private String productName;
     private String productDetail;
+    private String shortTitle;
+    private String materials;
     private List<String> productPhotos;
-    private int[] price = new int[3]; // 0: giá vốn, 1: giá lẻ, 2: giá sỉ
+    @Min(16) @Max(47)
+    private int size;
+    private String color;
+    private String brand;
+    private String category;
+    private double price;
     private double promotion;
     private int weight; // đơn vị gram
     private int stock;
@@ -32,13 +42,9 @@ public class Product {
         this.setProductCode(String.format("%07d", now % 1046527));
         this.setCreatedAt(now);
     };
-
-    public boolean validateUser(String userId) {
-        return this.getUserId().equals(userId);
-    }
     
     public void validateRequest() {
         if (this.getProductName() == null) throw new GlobalException("product name not null");
-        if (this.getPrice() == null) throw new GlobalException("price not null");
+        if (this.getPrice() == 0) throw new GlobalException("price not null");
     }
 }

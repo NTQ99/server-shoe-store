@@ -5,13 +5,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import shoe.store.server.exceptions.GlobalException;
 import shoe.store.server.models.Product;
 import shoe.store.server.payload.BasePageResponse;
 import shoe.store.server.payload.ErrorMessage;
-import shoe.store.server.security.jwt.JwtUtils;
 import shoe.store.server.services.ProductService;
 
 @RestController
@@ -20,12 +20,10 @@ public class ProductController {
 
     @Autowired
     private ProductService service;
-    @Autowired
-	private JwtUtils jwtUtils;
 
     @PostMapping("/get")
     public ResponseEntity<?> getAll() {
-
+        
         List<Product> products = service.getAllProducts();
 
         return new ResponseEntity<>(new BasePageResponse<>(products, ErrorMessage.StatusCode.OK.message), HttpStatus.OK);
@@ -37,26 +35,22 @@ public class ProductController {
 
         Product product = service.getProductById(id);
         if (product == null) product = service.getProductByCode(id);
-
+        
         return new ResponseEntity<>(new BasePageResponse<>(product, ErrorMessage.StatusCode.OK.message), HttpStatus.OK);
-
+        
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SELLER')")
     public ResponseEntity<?> create(@RequestBody Product productData) {
-
-        Product currProductData = service.getProductByName(productData.getProductName());
-
-        if (currProductData != null) {
-            throw new GlobalException(ErrorMessage.StatusCode.EXIST.message);
-        }
-
+        
         BasePageResponse<Product> response = new BasePageResponse<>(service.createProduct(productData), ErrorMessage.StatusCode.CREATED.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
-
+        
     }
-
+    
     @PostMapping("/update/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SELLER')")
     public ResponseEntity<?> update(@PathVariable("id") String id,
             @RequestBody Product newProductData) {
 
@@ -72,6 +66,7 @@ public class ProductController {
     }
 
     @PostMapping("/delete/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SELLER')")
     public ResponseEntity<?> delete(@PathVariable("id") String id) {
 
         Product currDeliveryData = service.getProductById(id);
@@ -87,11 +82,10 @@ public class ProductController {
     }
 
     @PostMapping("/delete")
-    public ResponseEntity<?> deleteAll(@RequestHeader("Authorization") String jwt) {
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SELLER')")
+    public ResponseEntity<?> deleteAll() {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
-        service.deleteAllProducts(userId);
+        service.deleteAllProducts();
         BasePageResponse<Product> response = new BasePageResponse<>(null, ErrorMessage.StatusCode.OK.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
 

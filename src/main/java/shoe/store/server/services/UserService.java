@@ -74,6 +74,10 @@ public class UserService {
         userRepository.deleteAll();
     }
 
+    public Boolean checkUserExists(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
     public Role getRoleByName(Role.ERole roleName) {
         return roleRepository.findByName(roleName).orElse(null);
     }

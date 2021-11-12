@@ -52,10 +52,12 @@
                                        data-eye>
                             </div>
                             <div class="form-group">
-                                <select id="criteriaId" name="roleName" class="custom-select form-control" required>
-                                    <option value="ROLE_ADMIN">Admin</option>
-                                    <option value="ROLE_SELLER">Seller</option>
-                                    <option value="ROLE_BUYER">Buyer</option>
+                                <select id="criteriaId" name="roleKey" class="custom-select form-control" required>
+                                    <option value="admin">Admin</option>
+                                    <option value="seller">Seller</option>
+                                    <option value>Buyer</option>
+                                </select>
+                                <select id="criteriaId2" name="roles" class="custom-select form-control" style="display: none">
                                 </select>
                             </div>
 
