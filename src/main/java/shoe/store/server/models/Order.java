@@ -40,6 +40,7 @@ public class Order {
     private String customerId;
     private String customerName;
     private String customerPhone;
+    private String customerEmail;
     private List<Item> products;
     private String deliveryUnitName;
     private String deliveryCode;
@@ -67,7 +68,9 @@ public class Order {
     }
 
     public void validateRequest() {
-        if (this.getCustomerPhone() == null) throw new GlobalException("customer name not null");
-        if (this.getProducts() == null) throw new GlobalException("products not null");
+        if (this.getCustomerName() == null || this.getCustomerName() == "") throw new GlobalException("Tên khách hàng không được bỏ trống!");
+        if (this.getCustomerPhone() == null || this.getCustomerPhone() == "") throw new GlobalException("Số điện thoại không được bỏ trống!");
+        if (this.getDeliveryTo() == null || (this.getDeliveryTo() != null && this.getDeliveryTo().getProvince() == "")) throw new GlobalException("Địa chỉ không được bỏ trống!");
+        if (this.getProducts() == null || (this.getProducts() != null && this.getProducts().isEmpty())) throw new GlobalException("Phải có ít nhất 1 sản phẩm!");
     }
 }

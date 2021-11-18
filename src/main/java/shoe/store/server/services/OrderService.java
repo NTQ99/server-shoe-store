@@ -37,16 +37,23 @@ public class OrderService {
 
         int totalPrice = 0;
         for (Order.Item item : orderData.getProducts()) {
-            Product product = productService.getProductByName(item.getProductName());
+            Product product = productService.getProductById(item.getProductId());
             if (product == null) {
                 throw new GlobalException("not found product with name: " + item.getProductName());
-            } else item.setProductId(product.getId());
+            }
             totalPrice += product.getPrice()*item.getQuantity();
         }
 
-        Customer customerData = customerService.getCustomerByPhone(orderData.getUserId(), orderData.getCustomerPhone());
+        Customer customerData = customerService.getCustomerByPhone(orderData.getCustomerPhone());
         if (customerData == null) {
-            Customer customer = new Customer(orderData.getUserId(), orderData.getCustomerName(), orderData.getCustomerPhone());
+            String[] names = orderData.getCustomerName().split("#");
+            String firstName = "";
+            String lastName = "";
+            if (names.length == 0) {
+                firstName = names[0];
+                lastName = "";
+            }
+            Customer customer = new Customer(firstName, lastName, orderData.getCustomerPhone(), orderData.getCustomerEmail());
             customer.setCustomerAddresses(Arrays.asList(orderData.getDeliveryTo()));
             orderData.setCustomerId(customerService.createCustomer(customer).getId());
         } else {
@@ -96,8 +103,8 @@ public class OrderService {
         return orderRepository.findByCustomerPhoneContainingAndStatus(phone, status, paging);
     }
 
-    public List<Order> getAllOrders(String userId) {
-        return orderRepository.findByUserId(userId);
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
     }
 
     public Page<Order> getAllOrdersCondition(String generalSearch, String status, Pageable paging) {
@@ -125,9 +132,9 @@ public class OrderService {
     public Order updateOrder(Order orderData, Order newOrderData) {
 
         if (!orderData.getCustomerPhone().equals(newOrderData.getCustomerPhone())) {
-            Customer newCustomerData = customerService.getCustomerByPhone(orderData.getUserId(), newOrderData.getCustomerPhone());
+            Customer newCustomerData = customerService.getCustomerByPhone(newOrderData.getCustomerPhone());
             if (newCustomerData == null) {
-                newCustomerData = new Customer(orderData.getUserId(), newOrderData.getCustomerName(), newOrderData.getCustomerPhone());
+                newCustomerData = new Customer(newOrderData.getCustomerName().split("#")[0], newOrderData.getCustomerName().split("#")[1], newOrderData.getCustomerPhone(), newOrderData.getCustomerEmail());
                 newCustomerData.setCustomerAddresses(Arrays.asList(orderData.getDeliveryTo()));
                 orderData.setCustomerId(customerService.createCustomer(newCustomerData).getId());
             } else {
@@ -136,6 +143,7 @@ public class OrderService {
             }
             orderData.setCustomerName(newOrderData.getCustomerName());
             orderData.setCustomerPhone(newOrderData.getCustomerPhone());
+            orderData.setCustomerEmail(newOrderData.getCustomerEmail());
         }
 
         if (!orderData.getDeliveryTo().equals(newOrderData.getDeliveryTo())) {

@@ -27,9 +27,7 @@ public class CustomerController {
     @PostMapping("/get")
     public ResponseEntity<?> getAll(@RequestHeader("Authorization") String jwt) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
-        List<Customer> customers = service.getAllCustomers(userId);
+        List<Customer> customers = service.getAllCustomers();
 
         return new ResponseEntity<>(new BasePageResponse<>(customers, ErrorMessage.StatusCode.OK.message), HttpStatus.OK);
 
@@ -38,11 +36,7 @@ public class CustomerController {
     @PostMapping("/get/{id}")
     public ResponseEntity<?> getById(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
         Customer customer = service.getCustomerById(id);
-
-        if (!customer.validateUser(userId)) throw new GlobalException(ErrorMessage.StatusCode.UNAUTHORIZED.message);
 
         return new ResponseEntity<>(new BasePageResponse<>(customer, ErrorMessage.StatusCode.OK.message), HttpStatus.OK);
 
@@ -51,15 +45,12 @@ public class CustomerController {
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestHeader("Authorization") String jwt, @RequestBody Customer customerData) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-        
-        Customer currCustomerData = service.getCustomerByPhone(userId, customerData.getCustomerPhone());
+        Customer currCustomerData = service.getCustomerByPhone(customerData.getCustomerPhone());
 
         if (currCustomerData != null) {
             throw new GlobalException(ErrorMessage.StatusCode.EXIST.message);
         }
 
-        customerData.setUserId(userId);
         BasePageResponse<Customer> response = new BasePageResponse<>(service.createCustomer(customerData), ErrorMessage.StatusCode.CREATED.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
 
@@ -69,18 +60,12 @@ public class CustomerController {
     public ResponseEntity<?> update(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id,
             @RequestBody Customer newCustomerData) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
         Customer currCustomerData = service.getCustomerById(id);
 
         if (currCustomerData == null) {
             throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
         }
         
-        if (!currCustomerData.validateUser(userId)) {
-            throw new GlobalException(ErrorMessage.StatusCode.UNAUTHORIZED.message);
-        }
-
         BasePageResponse<Customer> response = new BasePageResponse<>(service.updateCustomer(currCustomerData, newCustomerData), ErrorMessage.StatusCode.MODIFIED.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
 
@@ -90,18 +75,12 @@ public class CustomerController {
     public ResponseEntity<?> addAddress(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id,
             @RequestBody Address newAddress) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
         Customer currCustomerData = service.getCustomerById(id);
 
         if (currCustomerData == null) {
             throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
         }
         
-        if (!currCustomerData.validateUser(userId)) {
-            throw new GlobalException(ErrorMessage.StatusCode.UNAUTHORIZED.message);
-        }
-
         BasePageResponse<Customer> response = new BasePageResponse<>(service.addCustomerAddress(currCustomerData, newAddress), ErrorMessage.StatusCode.MODIFIED.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
 
@@ -111,16 +90,10 @@ public class CustomerController {
     public ResponseEntity<?> updateAddress(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id, @PathVariable("index") String index,
             @RequestBody Address newAddressData) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
         Customer currCustomerData = service.getCustomerById(id);
 
         if (currCustomerData == null) {
             throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
-        }
-        
-        if (!currCustomerData.validateUser(userId)) {
-            throw new GlobalException(ErrorMessage.StatusCode.UNAUTHORIZED.message);
         }
         
         BasePageResponse<Customer> response = new BasePageResponse<>(service.updateCustomerAddress(currCustomerData, Integer.parseInt(index), newAddressData), ErrorMessage.StatusCode.MODIFIED.message);
@@ -131,16 +104,10 @@ public class CustomerController {
     @PostMapping("/delete/address/{id}/{index}")
     public ResponseEntity<?> removeAddress(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id, @PathVariable("index") String index) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
         Customer currCustomerData = service.getCustomerById(id);
 
         if (currCustomerData == null) {
             throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
-        }
-        
-        if (!currCustomerData.validateUser(userId)) {
-            throw new GlobalException(ErrorMessage.StatusCode.UNAUTHORIZED.message);
         }
         
         BasePageResponse<Customer> response = new BasePageResponse<>(service.removeCustomerAddress(currCustomerData, Integer.parseInt(index)), ErrorMessage.StatusCode.MODIFIED.message);
@@ -151,18 +118,12 @@ public class CustomerController {
     @PostMapping("/delete/{id}")
     public ResponseEntity<?> delete(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
         Customer currDeliveryData = service.getCustomerById(id);
 
         if (currDeliveryData == null) {
             throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
         }
         
-        if (!currDeliveryData.validateUser(userId)) {
-            throw new GlobalException(ErrorMessage.StatusCode.UNAUTHORIZED.message);
-        }
-
         service.deleteCustomer(id);
         BasePageResponse<Customer> response = new BasePageResponse<>(null, ErrorMessage.StatusCode.OK.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -172,9 +133,7 @@ public class CustomerController {
     @PostMapping("/delete")
     public ResponseEntity<?> deleteAll(@RequestHeader("Authorization") String jwt) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
-        service.deleteAllCustomers(userId);
+        service.deleteAllCustomers();
         BasePageResponse<Customer> response = new BasePageResponse<>(null, ErrorMessage.StatusCode.OK.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
 

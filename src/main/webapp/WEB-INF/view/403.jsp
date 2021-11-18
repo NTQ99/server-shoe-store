@@ -79,7 +79,8 @@
             <script type="text/javascript">
                 function checkSite() {
                     var currentSite = window.location.hostname;
-                    window.location = "http://" + currentSite;
+                    var currentPort = window.location.port;
+                    window.location = "http://" + currentSite + ":"+currentPort;
                 }
             </script>
         </p>

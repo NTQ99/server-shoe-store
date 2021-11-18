@@ -10,9 +10,8 @@ import shoe.store.server.models.Customer;
 
 public interface CustomerRepository extends MongoRepository<Customer, String> {
     Customer findByCustomerCode(String customerCode);
-    List<Customer> findByUserId(String userId);
+    List<Customer> findByCustomerPhone(String customerPhone);
     Page<Customer> findByCustomerNameContainingIgnoreCase(String customerName, Pageable paging);
     Page<Customer> findByCustomerPhoneContaining(String customerPhone, Pageable paging);
     Customer findOneByCustomerPhone(String customerPhone);
-    void deleteByUserId(String userId);
 }

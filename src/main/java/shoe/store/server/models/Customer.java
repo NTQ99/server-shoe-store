@@ -20,8 +20,9 @@ public class Customer {
     @Id
     private String id;
 
-    private String userId;
     private String customerCode;
+    private String customerFirstName;
+    private String customerLastName;
     private String customerName;
     private int customerGender; //0: khác 1: nam 2: nữ
     private String customerPhone;
@@ -37,13 +38,15 @@ public class Customer {
         this.setCreatedAt(now);
     };
 
-    public Customer(String userId, String customerName, String customerPhone) {
+    public Customer(String customerFirstName, String customerLastName, String customerPhone, String customerEmail) {
         long now = System.currentTimeMillis();
         this.setCustomerCode(String.format("%07d", now % 1046527));
         this.setCreatedAt(now);
-        this.setUserId(userId);
-        this.setCustomerName(customerName);
+        this.setCustomerFirstName(customerFirstName);
+        this.setCustomerLastName(customerLastName);
         this.setCustomerPhone(customerPhone);
+        this.setCustomerEmail(customerEmail);
+        this.setCustomerName(customerFirstName + " " + customerLastName);
     };
 
     public void addCustomerAddress(Address customerAddress) {
@@ -69,15 +72,12 @@ public class Customer {
 
         Customer customer = (Customer) o;
 
-        return this.getCustomerName().equals(customer.getCustomerName()) && this.getCustomerPhone().equals(customer.getCustomerPhone());
-    }
-
-    public boolean validateUser(String userId) {
-        return this.getUserId().equals(userId);
+        return this.getCustomerFirstName().equals(customer.getCustomerFirstName()) && this.getCustomerLastName().equals(customer.getCustomerFirstName()) && this.getCustomerPhone().equals(customer.getCustomerPhone());
     }
 
     public void validateRequest() {
         if (this.getCustomerPhone() == null) throw new GlobalException("customer phone not null");
-        if (this.getCustomerName() == null) throw new GlobalException("customer name not null");
+        if (this.getCustomerFirstName() == null) throw new GlobalException("customer first name not null");
+        if (this.getCustomerLastName() == null) throw new GlobalException("customer last name not null");
     }
 }

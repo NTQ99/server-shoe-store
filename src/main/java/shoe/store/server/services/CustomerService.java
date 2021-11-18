@@ -1,7 +1,6 @@
 package shoe.store.server.services;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,27 +28,22 @@ public class CustomerService {
         return customerRepository.findByCustomerCode(code);
     }
 
-    public Customer getCustomerByPhone(String userId, String phone) {
-        List<Customer> customers = customerRepository.findByUserId(userId);
-        customers = customers.stream().filter(customer -> customer.getCustomerPhone().equals(phone))
-                .collect(Collectors.toList());
-        if (customers.isEmpty()) {
-            return null;
-        }
-        return customers.get(0);
+    public Customer getCustomerByPhone(String phone) {
+        return customerRepository.findOneByCustomerPhone(phone);
     }
 
     public Page<Customer> findCustomerByPhone(String phone, Pageable paging) {
         return customerRepository.findByCustomerPhoneContaining(phone, paging);
     }
 
-    public List<Customer> getAllCustomers(String userId) {
-        return customerRepository.findByUserId(userId);
+    public List<Customer> getAllCustomers() {
+        return customerRepository.findAll();
     }
 
     public Customer updateCustomer(Customer customerData, Customer newCustomerData) {
 
-        customerData.setCustomerName(newCustomerData.getCustomerName());
+        customerData.setCustomerFirstName(newCustomerData.getCustomerFirstName());
+        customerData.setCustomerLastName(newCustomerData.getCustomerLastName());
         customerData.setCustomerGender(newCustomerData.getCustomerGender());
         customerData.setCustomerPhone(newCustomerData.getCustomerPhone());
         customerData.setCustomerEmail(newCustomerData.getCustomerEmail());
@@ -85,8 +79,8 @@ public class CustomerService {
         customerRepository.deleteById(id);
     }
 
-    public void deleteAllCustomers(String userId) {
-        customerRepository.deleteByUserId(userId);
+    public void deleteAllCustomers() {
+        customerRepository.deleteAll();
     }
 
 }

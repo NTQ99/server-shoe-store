@@ -21,8 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import shoe.store.server.security.jwt.*;
 import shoe.store.server.security.services.*;
+import shoe.store.server.services.CustomerService;
 import shoe.store.server.services.UserService;
 import shoe.store.server.exceptions.GlobalException;
+import shoe.store.server.models.Customer;
 import shoe.store.server.models.Role;
 import shoe.store.server.models.User;
 import shoe.store.server.payload.BasePageResponse;
@@ -38,6 +40,9 @@ public class AuthController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private CustomerService customerService;
 
 	@Autowired
 	private PasswordEncoder encoder;
@@ -113,7 +118,10 @@ public class AuthController {
         user.setPhone(registerRequest.getPhone());
         user.setAddress(registerRequest.getAddress());
 
+		Customer customer = new Customer(user.getFirstName(), user.getLastName(), user.getPhone(), user.getEmail());
+
 		userService.createUser(user);
+		customerService.createCustomer(customer);
 
 		BasePageResponse<?> response = new BasePageResponse<>(null, ErrorMessage.StatusCode.USER_CREATED.message);
 

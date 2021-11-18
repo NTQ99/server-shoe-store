@@ -34,9 +34,7 @@ public class OrderController {
     @PostMapping("/get")
     public ResponseEntity<BasePageResponse<List<Order>>> getAll(@RequestHeader("Authorization") String jwt) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
-        List<Order> orders = service.getAllOrders(userId);
+        List<Order> orders = service.getAllOrders();
 
         return new ResponseEntity<>(new BasePageResponse<>(orders, ErrorMessage.StatusCode.OK.message), HttpStatus.OK);
 
@@ -73,9 +71,7 @@ public class OrderController {
     @PostMapping("/create")
     public ResponseEntity<BasePageResponse<Order>> create(@RequestHeader("Authorization") String jwt, @RequestBody Order orderData) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-        
-        orderData.setUserId(userId);
+        orderData.validateRequest();
         BasePageResponse<Order> response = new BasePageResponse<>(service.createOrder(orderData), ErrorMessage.StatusCode.CREATED.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
 

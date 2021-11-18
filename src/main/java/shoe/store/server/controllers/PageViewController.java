@@ -13,12 +13,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import shoe.store.server.exceptions.GlobalException;
+import shoe.store.server.models.Customer;
 import shoe.store.server.models.Role;
 import shoe.store.server.models.User;
 import shoe.store.server.payload.BasePageResponse;
 import shoe.store.server.payload.ErrorMessage;
 import shoe.store.server.payload.request.RegisterRequest;
 import shoe.store.server.security.jwt.JwtUtils;
+import shoe.store.server.services.CustomerService;
 import shoe.store.server.services.UserService;
 
 import java.util.HashSet;
@@ -33,6 +35,9 @@ public class PageViewController {
 
     @Autowired
     private UserService service;
+
+    @Autowired
+    private CustomerService customerService;
 
     @Autowired
 	private JwtUtils jwtUtils;
@@ -164,6 +169,7 @@ public class PageViewController {
             dbUser.setLastName(request.getLastName());
             dbUser.setEmail(request.getEmail());
             dbUser.setPhone(request.getPhone());
+            Customer customer = new Customer(dbUser.getFirstName(), dbUser.getLastName(), dbUser.getPhone(), dbUser.getEmail());
             
             Set<Role> roles = new HashSet<>();
             
@@ -181,14 +187,15 @@ public class PageViewController {
                         userRole = service.getRoleByName(Role.ERole.ROLE_SELLER);
                         break;
                     default:
-                        result = "redirect:/addNewUser?error=Select a valid Role";
+                        return "redirect:/addNewUser?error=Select a valid Role";
                     }
             }
             roles.add(userRole);
             dbUser.setRoles(roles);
             service.createUser(dbUser);
+            customerService.createCustomer(customer);
         } else {
-            result = "redirect:/addNewUser?error=User Already Exists!";
+            return "redirect:/addNewUser?error=User Already Exists!";
         }
 
         return result;
