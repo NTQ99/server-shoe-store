@@ -218,13 +218,11 @@ public class OrderController {
     @PostMapping("/delivery/print")
     public ResponseEntity<BasePageResponse<String>> printAllOrder(@RequestHeader("Authorization") String jwt, @RequestBody(required = false) Object request) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
         ObjectMapper objectMapper = new ObjectMapper();
             Map<String, String> map = objectMapper.convertValue(request, new TypeReference<Map<String, String>>() {});
         String type = map.get("type");
 
-        List<Order> orders = service.getAllOrders(userId);
+        List<Order> orders = service.getAllOrders();
 
         if (orders == null) {
             throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
