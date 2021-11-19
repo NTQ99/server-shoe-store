@@ -9,5 +9,6 @@ import shoe.store.server.models.User;
 public interface UserRepository extends MongoRepository<User, String> {
     User findByUsername(String username);
     Boolean existsByUsername(String username);
+    Boolean existsByPhone(String phone);
     Page<User> findByUsernameContaining(String username, Pageable paging);
 }

@@ -83,6 +83,9 @@ public class AuthController {
 		if (userService.checkUserExists(registerRequest.getUsername())) {
 			throw new GlobalException(ErrorMessage.StatusCode.USER_EXIST.message);
 		}
+		if (userService.checkPhoneExists(registerRequest.getPhone())) {
+			throw new GlobalException(ErrorMessage.StatusCode.PHONE_EXIST.message);
+		}
 
 		// Create new user's account
 		User user = new User(registerRequest.getUsername(), encoder.encode(registerRequest.getPassword()));

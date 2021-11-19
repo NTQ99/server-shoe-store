@@ -78,6 +78,10 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
+    public Boolean checkPhoneExists(String phone) {
+        return userRepository.existsByPhone(phone);
+    }
+
     public Role getRoleByName(Role.ERole roleName) {
         return roleRepository.findByName(roleName).orElse(null);
     }

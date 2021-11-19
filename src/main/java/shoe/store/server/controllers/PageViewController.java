@@ -153,50 +153,52 @@ public class PageViewController {
     @PostMapping("/register")
     public String register(@ModelAttribute RegisterRequest request) {
         String result = "redirect:/home";
-        User dbUser = service.getUserByUsername(request.getUsername());
+        if (service.checkUserExists(request.getUsername())) {
+			return "redirect:/addNewUser?error=User Already Exists!";
+		}
+		if (service.checkPhoneExists(request.getPhone())) {
+			return "redirect:/addNewUser?error=Phone Already Exists!";
+		}
         if (request.getFirstName() == null || request.getFirstName().trim().isEmpty()) {
-            result = "redirect:/addNewUser?error=Enter valid fist name";
+            return "redirect:/addNewUser?error=Enter valid fist name";
         } else if (request.getLastName() == null || request.getLastName().trim().isEmpty()) {
-            result = "redirect:/addNewUser?error=Enter valid last name";
+            return "redirect:/addNewUser?error=Enter valid last name";
         } else if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-            result = "redirect:/addNewUser?error=Enter valid email";
+            return "redirect:/addNewUser?error=Enter valid email";
         } else if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
-            result = "redirect:/addNewUser?error=Enter valid password";
+            return "redirect:/addNewUser?error=Enter valid password";
         }
-        if (dbUser == null) {
-            dbUser = new User(request.getUsername(),encoder.encode(request.getPassword()));
-            dbUser.setFirstName(request.getFirstName());
-            dbUser.setLastName(request.getLastName());
-            dbUser.setEmail(request.getEmail());
-            dbUser.setPhone(request.getPhone());
-            Customer customer = new Customer(dbUser.getFirstName(), dbUser.getLastName(), dbUser.getPhone(), dbUser.getEmail());
-            
-            Set<Role> roles = new HashSet<>();
-            
-            String registerRole = request.getRoleKey();
-            
-            Role userRole = new Role();
-            if (registerRole == null || registerRole == "") {
-                userRole = service.getRoleByName(Role.ERole.ROLE_BUYER);
-            } else {
-                switch (registerRole) {
-                    case "admin":
-                        userRole = service.getRoleByName(Role.ERole.ROLE_ADMIN);
-                        break;
-                    case "seller":
-                        userRole = service.getRoleByName(Role.ERole.ROLE_SELLER);
-                        break;
-                    default:
-                        return "redirect:/addNewUser?error=Select a valid Role";
-                    }
-            }
-            roles.add(userRole);
-            dbUser.setRoles(roles);
-            service.createUser(dbUser);
-            customerService.createCustomer(customer);
+
+        User dbUser = new User(request.getUsername(),encoder.encode(request.getPassword()));
+        dbUser.setFirstName(request.getFirstName());
+        dbUser.setLastName(request.getLastName());
+        dbUser.setEmail(request.getEmail());
+        dbUser.setPhone(request.getPhone());
+        Customer customer = new Customer(dbUser.getFirstName(), dbUser.getLastName(), dbUser.getPhone(), dbUser.getEmail());
+        
+        Set<Role> roles = new HashSet<>();
+        
+        String registerRole = request.getRoleKey();
+        
+        Role userRole = new Role();
+        if (registerRole == null || registerRole == "") {
+            userRole = service.getRoleByName(Role.ERole.ROLE_BUYER);
         } else {
-            return "redirect:/addNewUser?error=User Already Exists!";
+            switch (registerRole) {
+                case "admin":
+                    userRole = service.getRoleByName(Role.ERole.ROLE_ADMIN);
+                    break;
+                case "seller":
+                    userRole = service.getRoleByName(Role.ERole.ROLE_SELLER);
+                    break;
+                default:
+                    return "redirect:/addNewUser?error=Select a valid Role";
+                }
         }
+        roles.add(userRole);
+        dbUser.setRoles(roles);
+        service.createUser(dbUser);
+        customerService.createCustomer(customer);
 
         return result;
     }

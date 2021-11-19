@@ -32,6 +32,7 @@ public class ErrorMessage {
         USER_NOT_MODIFIED(209, "Tài khoản không được cập nhật!"),
         USER_NOT_ROLE(210, "Tài khoản không có quyền truy cập!"),
         USER_UNAUTHORIZED(211, "Tài khoản thiếu token xác thực!"),
+        PHONE_EXIST(212, "Số điện thoại đã tồn tại!"),
 
         OUT_OF_STOCK(300, "Số lượng sản phẩm đã hết!"),
 
