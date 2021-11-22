@@ -156,9 +156,14 @@ public class PageViewController {
         if (service.checkUserExists(request.getUsername())) {
 			return "redirect:/addNewUser?error=User Already Exists!";
 		}
-		if (service.checkPhoneExists(request.getPhone())) {
+
+        String phone = request.getPhone();
+		if (request.getPhone().startsWith("+84")) phone = request.getPhone().substring(3);
+		if (phone != null && phone != "" && !phone.startsWith("0")) phone = "0" + phone;
+		if (service.checkPhoneExists(phone)) {
 			return "redirect:/addNewUser?error=Phone Already Exists!";
 		}
+
         if (request.getFirstName() == null || request.getFirstName().trim().isEmpty()) {
             return "redirect:/addNewUser?error=Enter valid fist name";
         } else if (request.getLastName() == null || request.getLastName().trim().isEmpty()) {
@@ -169,13 +174,6 @@ public class PageViewController {
             return "redirect:/addNewUser?error=Enter valid password";
         }
 
-        User dbUser = new User(request.getUsername(),encoder.encode(request.getPassword()));
-        dbUser.setFirstName(request.getFirstName());
-        dbUser.setLastName(request.getLastName());
-        dbUser.setEmail(request.getEmail());
-        dbUser.setPhone(request.getPhone());
-        Customer customer = new Customer(dbUser.getFirstName(), dbUser.getLastName(), dbUser.getPhone(), dbUser.getEmail());
-        
         Set<Role> roles = new HashSet<>();
         
         String registerRole = request.getRoleKey();
@@ -186,17 +184,34 @@ public class PageViewController {
         } else {
             switch (registerRole) {
                 case "admin":
-                    userRole = service.getRoleByName(Role.ERole.ROLE_ADMIN);
-                    break;
+                userRole = service.getRoleByName(Role.ERole.ROLE_ADMIN);
+                break;
                 case "seller":
-                    userRole = service.getRoleByName(Role.ERole.ROLE_SELLER);
-                    break;
+                userRole = service.getRoleByName(Role.ERole.ROLE_SELLER);
+                break;
                 default:
-                    return "redirect:/addNewUser?error=Select a valid Role";
-                }
+                return "redirect:/addNewUser?error=Select a valid Role";
+            }
         }
         roles.add(userRole);
+
+        User dbUser = new User(request.getUsername(),encoder.encode(request.getPassword()));
         dbUser.setRoles(roles);
+        dbUser.setFirstName(request.getFirstName());
+        dbUser.setLastName(request.getLastName());
+        dbUser.setEmail(request.getEmail());
+        dbUser.setPhone(phone);
+		
+		Customer customer = customerService.getCustomerByPhone(phone);
+		if (customer == null) {
+            customer = new Customer(dbUser.getFirstName(), dbUser.getLastName(), dbUser.getPhone(), dbUser.getEmail());
+		} else {
+            customer.setCustomerFirstName(dbUser.getFirstName());
+			customer.setCustomerLastName(dbUser.getLastName());
+			customer.setCustomerEmail(dbUser.getEmail());
+		}
+        dbUser.setCustomerCode(customer.getCustomerCode());
+        
         service.createUser(dbUser);
         customerService.createCustomer(customer);
 

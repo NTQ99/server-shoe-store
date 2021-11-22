@@ -45,7 +45,7 @@ public class User {
     private String firstName;
     private String lastName;
     private String phone;
-    private Address address;
+    private String customerCode;
     private long createdAt;
 
     public User() {
@@ -67,6 +67,6 @@ public class User {
         this.setFirstName(newData.getFirstName());
         this.setLastName(newData.getLastName());
         this.setPhone(newData.getPhone());
-        this.setAddress(newData.getAddress());
+        this.setCustomerCode(newData.getCustomerCode());
     }
 }

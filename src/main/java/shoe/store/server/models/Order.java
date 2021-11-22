@@ -72,5 +72,10 @@ public class Order {
         if (this.getCustomerPhone() == null || this.getCustomerPhone() == "") throw new GlobalException("Số điện thoại không được bỏ trống!");
         if (this.getDeliveryTo() == null || (this.getDeliveryTo() != null && this.getDeliveryTo().getProvince() == "")) throw new GlobalException("Địa chỉ không được bỏ trống!");
         if (this.getProducts() == null || (this.getProducts() != null && this.getProducts().isEmpty())) throw new GlobalException("Phải có ít nhất 1 sản phẩm!");
+
+        String phone = this.getCustomerPhone();
+		if (this.getCustomerPhone().startsWith("+84")) phone = this.getCustomerPhone().substring(3);
+		if (phone != null && phone != "" && !phone.startsWith("0")) phone = "0" + phone;
+        this.setCustomerPhone(phone);
     }
 }

@@ -31,6 +31,23 @@ public class ProductService {
     private BrandRepository brandRepository;
 
     public Product createProduct(Product product) {
+        String colorCode = "XX";
+        if (product.getColor().toUpperCase().contains("ĐEN")) colorCode = "DE";
+        else if (product.getColor().toUpperCase().contains("XANH")) colorCode = "XA";
+        else if (product.getColor().toUpperCase().contains("BE")) colorCode = "BE";
+        else if (product.getColor().toUpperCase().contains("NÂU")) colorCode = "NA";
+        else if (product.getColor().toUpperCase().contains("ĐỎ")) colorCode = "DO";
+        else if (product.getColor().toUpperCase().contains("KEM")) colorCode = "KE";
+        else if (product.getColor().toUpperCase().contains("TÍM")) colorCode = "TI";
+        else if (product.getColor().toUpperCase().contains("VÀNG")) colorCode = "VA";
+        else if (product.getColor().toUpperCase().contains("XÁM")) colorCode = "XS";
+        else if (product.getColor().toUpperCase().contains("CAM")) colorCode = "CA";
+        else if (product.getColor().toUpperCase().contains("HỒNG")) colorCode = "HO";
+        else if (product.getColor().toUpperCase().contains("TRẮNG")) colorCode = "TR";
+
+        String productCode = product.getProductCode() + "-" + colorCode + product.getSize();
+        product.setProductCode(productCode);
+
         return productRepository.save(product);
     }
 

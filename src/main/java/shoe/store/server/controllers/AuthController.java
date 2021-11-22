@@ -83,7 +83,11 @@ public class AuthController {
 		if (userService.checkUserExists(registerRequest.getUsername())) {
 			throw new GlobalException(ErrorMessage.StatusCode.USER_EXIST.message);
 		}
-		if (userService.checkPhoneExists(registerRequest.getPhone())) {
+
+		String phone = registerRequest.getPhone();
+		if (registerRequest.getPhone().startsWith("+84")) phone = registerRequest.getPhone().substring(3);
+		if (phone != null && phone != "" && !phone.startsWith("0")) phone = "0" + phone;
+		if (userService.checkPhoneExists(phone)) {
 			throw new GlobalException(ErrorMessage.StatusCode.PHONE_EXIST.message);
 		}
 
@@ -118,10 +122,17 @@ public class AuthController {
 		user.setEmail(registerRequest.getEmail());
         user.setFirstName(registerRequest.getFirstName());
         user.setLastName(registerRequest.getLastName());
-        user.setPhone(registerRequest.getPhone());
-        user.setAddress(registerRequest.getAddress());
-
-		Customer customer = new Customer(user.getFirstName(), user.getLastName(), user.getPhone(), user.getEmail());
+        user.setPhone(phone);
+		
+		Customer customer = customerService.getCustomerByPhone(phone);
+		if (customer == null) {
+			customer = new Customer(user.getFirstName(), user.getLastName(), user.getPhone(), user.getEmail());
+		} else {
+			customer.setCustomerFirstName(user.getFirstName());
+			customer.setCustomerLastName(user.getLastName());
+			customer.setCustomerEmail(user.getEmail());
+		}
+        user.setCustomerCode(customer.getCustomerCode());
 
 		userService.createUser(user);
 		customerService.createCustomer(customer);

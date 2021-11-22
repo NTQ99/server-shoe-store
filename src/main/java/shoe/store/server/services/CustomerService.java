@@ -17,11 +17,28 @@ public class CustomerService {
     private CustomerRepository customerRepository;
 
     public Customer createCustomer(Customer customer) {
+        if (customer.getCustomerName() == null || customer.getCustomerName() == "") {
+            customer.setCustomerName(customer.getCustomerFirstName() + " " + customer.getCustomerLastName());
+        }
+        if ((customer.getCustomerFirstName() == null || customer.getCustomerFirstName() == "")
+                && (customer.getCustomerLastName() == null || customer.getCustomerLastName() == "")) {
+            String[] names = customer.getCustomerName().split(" ", 2);
+            String firstName = "";
+            String lastName = "";
+            if (names.length >= 1) firstName = names[0].trim();
+            if (names.length >= 2) lastName = names[1].trim();
+            customer.setCustomerName((firstName + " " + lastName).trim());
+        }
         return customerRepository.save(customer);
     }
 
     public Customer getCustomerById(String id) {
-        return customerRepository.findById(id).orElse(null);
+        Customer customer = customerRepository.findById(id).orElse(null);
+        if (customer != null) {
+            return customer;
+        } else {
+            return this.getCustomerByCode(id);
+        }
     }
 
     public Customer getCustomerByCode(String code) {
@@ -44,6 +61,7 @@ public class CustomerService {
 
         customerData.setCustomerFirstName(newCustomerData.getCustomerFirstName());
         customerData.setCustomerLastName(newCustomerData.getCustomerLastName());
+        customerData.setCustomerName(newCustomerData.getCustomerName());
         customerData.setCustomerGender(newCustomerData.getCustomerGender());
         customerData.setCustomerPhone(newCustomerData.getCustomerPhone());
         customerData.setCustomerEmail(newCustomerData.getCustomerEmail());

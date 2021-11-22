@@ -38,6 +38,15 @@ public class Customer {
         this.setCreatedAt(now);
     };
 
+    public Customer(String customerName, String customerPhone, String customerEmail) {
+        long now = System.currentTimeMillis();
+        this.setCustomerCode(String.format("%07d", now % 1046527));
+        this.setCreatedAt(now);
+        this.setCustomerPhone(customerPhone);
+        this.setCustomerEmail(customerEmail);
+        this.setCustomerName(customerName);
+    };
+
     public Customer(String customerFirstName, String customerLastName, String customerPhone, String customerEmail) {
         long now = System.currentTimeMillis();
         this.setCustomerCode(String.format("%07d", now % 1046527));
@@ -46,7 +55,6 @@ public class Customer {
         this.setCustomerLastName(customerLastName);
         this.setCustomerPhone(customerPhone);
         this.setCustomerEmail(customerEmail);
-        this.setCustomerName(customerFirstName + " " + customerLastName);
     };
 
     public void addCustomerAddress(Address customerAddress) {

@@ -46,18 +46,13 @@ public class OrderService {
 
         Customer customerData = customerService.getCustomerByPhone(orderData.getCustomerPhone());
         if (customerData == null) {
-            String[] names = orderData.getCustomerName().split("#");
-            String firstName = "";
-            String lastName = "";
-            if (names.length == 0) {
-                firstName = names[0];
-                lastName = "";
-            }
-            Customer customer = new Customer(firstName, lastName, orderData.getCustomerPhone(), orderData.getCustomerEmail());
+            Customer customer = new Customer(orderData.getCustomerName(), orderData.getCustomerPhone(), orderData.getCustomerEmail());
             customer.setCustomerAddresses(Arrays.asList(orderData.getDeliveryTo()));
             orderData.setCustomerId(customerService.createCustomer(customer).getId());
         } else {
             orderData.setCustomerId(customerData.getId());
+            orderData.setCustomerName(customerData.getCustomerName());
+            orderData.setCustomerEmail(customerData.getCustomerEmail());
             customerService.addCustomerAddress(customerData, orderData.getDeliveryTo());
         }
 
