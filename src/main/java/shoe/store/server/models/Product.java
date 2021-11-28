@@ -44,7 +44,29 @@ public class Product {
     };
     
     public void validateRequest() {
-        if (this.getProductName() == null) throw new GlobalException("product name not null");
-        if (this.getPrice() == 0) throw new GlobalException("price not null");
+        if (this.getProductName() == null) throw new GlobalException("Tên sản phẩm không đươc bỏ trống!");
+        if (this.getPrice() == 0) throw new GlobalException("Giá sản phẩm không đươc bỏ trống!");
+        if (this.getProductPhotos() == null) throw new GlobalException("Hình ảnh sản phẩm không đươc bỏ trống!");
+
+        String colorName = this.getColor().toUpperCase();
+        if (colorName.length() != 2) {
+            String colorCode = "XX";
+            if (colorName.contains("ĐEN")) colorCode = "DE";
+            else if (colorName.contains("XANH")) {
+                if (colorName.contains("LỤC")) colorCode = "XL";
+                else colorCode = "XB";
+            }
+            else if (colorName.contains("BE")) colorCode = "BE";
+            else if (colorName.contains("NÂU")) colorCode = "NA";
+            else if (colorName.contains("ĐỎ")) colorCode = "DO";
+            else if (colorName.contains("TÍM")) colorCode = "TI";
+            else if (colorName.contains("VÀNG")) colorCode = "VA";
+            else if (colorName.contains("XÁM")) colorCode = "XA";
+            else if (colorName.contains("CAM")) colorCode = "CA";
+            else if (colorName.contains("HỒNG")) colorCode = "HO";
+            else if (colorName.contains("TRẮNG")) colorCode = "TR";
+    
+            this.setColor(colorCode);
+        }
     }
 }

@@ -25,6 +25,8 @@ public class OrderService {
     @Autowired
     private CustomerService customerService;
     @Autowired
+    private CartService cartService;
+    @Autowired
     private ProductService productService;
     @Autowired
     private DeliveryUnitService deliveryUnitService;
@@ -32,8 +34,6 @@ public class OrderService {
     private DeliveryService deliveryService;
 
     public Order createOrder(Order orderData) {
-
-        if (orderData.getProducts() == null) throw new GlobalException("products not null");
 
         int totalPrice = 0;
         for (Order.Item item : orderData.getProducts()) {
@@ -59,7 +59,11 @@ public class OrderService {
         if (orderData.getTotalPrice() == 0) orderData.setTotalPrice(totalPrice);
         if (orderData.getCodAmount() == -1) orderData.setCodAmount(totalPrice);
 
-        return orderRepository.save(orderData);
+        Order newOrder = orderRepository.save(orderData);
+        if (newOrder != null) {
+            cartService.deleteCartByUserId(newOrder.getUserId());
+        }
+        return newOrder;
     }
 
     public Order getOrderById(String id) {

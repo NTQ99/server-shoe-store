@@ -1,5 +1,6 @@
 package shoe.store.server.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import shoe.store.server.models.Product;
+import shoe.store.server.models.ProductGroup;
 import shoe.store.server.models.Size;
+import shoe.store.server.payload.response.ProductResponse;
 import shoe.store.server.models.Color;
 import shoe.store.server.models.Brand;
 import shoe.store.server.repositories.BrandRepository;
@@ -31,22 +34,6 @@ public class ProductService {
     private BrandRepository brandRepository;
 
     public Product createProduct(Product product) {
-        String colorCode = "XX";
-        if (product.getColor().toUpperCase().contains("ĐEN")) colorCode = "DE";
-        else if (product.getColor().toUpperCase().contains("XANH")) colorCode = "XA";
-        else if (product.getColor().toUpperCase().contains("BE")) colorCode = "BE";
-        else if (product.getColor().toUpperCase().contains("NÂU")) colorCode = "NA";
-        else if (product.getColor().toUpperCase().contains("ĐỎ")) colorCode = "DO";
-        else if (product.getColor().toUpperCase().contains("KEM")) colorCode = "KE";
-        else if (product.getColor().toUpperCase().contains("TÍM")) colorCode = "TI";
-        else if (product.getColor().toUpperCase().contains("VÀNG")) colorCode = "VA";
-        else if (product.getColor().toUpperCase().contains("XÁM")) colorCode = "XS";
-        else if (product.getColor().toUpperCase().contains("CAM")) colorCode = "CA";
-        else if (product.getColor().toUpperCase().contains("HỒNG")) colorCode = "HO";
-        else if (product.getColor().toUpperCase().contains("TRẮNG")) colorCode = "TR";
-
-        String productCode = product.getProductCode() + "-" + colorCode + product.getSize();
-        product.setProductCode(productCode);
 
         return productRepository.save(product);
     }
@@ -55,8 +42,25 @@ public class ProductService {
         return productRepository.findById(id).orElse(null);
     }
 
+    public List<ProductResponse> groupByProductCode() {
+        List<ProductGroup> productGroups = productRepository.findProductsGroupByProductCode();
+        List<ProductResponse> responses = new ArrayList<>();
+        for (ProductGroup productGroup : productGroups) {
+            ProductResponse productResponse = new ProductResponse();
+            productResponse.setProductInfo(productGroup.getProducts().get(0));
+            productResponse.setProducts(productGroup.getProducts());
+            responses.add(productResponse);
+        }
+
+        return responses;
+    }
+
     public Product getProductByCode(String code) {
         return productRepository.findByProductCode(code);
+    }
+
+    public List<Product> getProductsByCode(String code) {
+        return productRepository.findByProductCodeContaining(code);
     }
 
     public Product getProductByName(String name) {
@@ -121,8 +125,10 @@ public class ProductService {
         return colorRepository.findAll();
     }
 
-    public Color getColorByValue(String name) {
-        return colorRepository.findByName(name);
+    public String getColorCode(String id) {
+        Color color = colorRepository.findById(id).orElse(null);
+        if (color == null) return "";
+        else return color.getValue();
     }
 
     public Color createColor(Color color) {

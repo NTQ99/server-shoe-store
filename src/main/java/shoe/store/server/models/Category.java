@@ -10,8 +10,16 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Category {
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SizeRange {
+        private int min;
+        private int max;
+    }
     @Id
     private String id;
 
     private String categoryName;
+    private SizeRange sizeRange;
 }

@@ -69,18 +69,19 @@ public class InitialSetup {
     public void initColor() throws Exception {
         List<Color> colors = colorRepository.findAll();
         if (colors.isEmpty()) {
-            Color newColor1 = new Color("DE", "Đen");colorRepository.save(newColor1);
-            Color newColor2 = new Color("XA", "Xanh");colorRepository.save(newColor2);
-            Color newColor3 = new Color("BE", "Be");colorRepository.save(newColor3);
-            Color newColor4 = new Color("NA", "Nâu");colorRepository.save(newColor4);
-            Color newColor5 = new Color("DO", "Đỏ");colorRepository.save(newColor5);
-            Color newColor6 = new Color("KE", "Kem");colorRepository.save(newColor6);
-            Color newColor7 = new Color("TI", "Tím");colorRepository.save(newColor7);
-            Color newColor8 = new Color("VA", "Vàng");colorRepository.save(newColor8);
-            Color newColor9 = new Color("XS", "Xám");colorRepository.save(newColor9);
-            Color newColor10 = new Color("CA", "Cam");colorRepository.save(newColor10);
-            Color newColor11 = new Color("HO", "Hồng");colorRepository.save(newColor11);
-            Color newColor13 = new Color("TR", "Trắng");colorRepository.save(newColor13);
+            Color newColor1 = new Color("DE", "Đen", "#000000");colorRepository.save(newColor1);
+            Color newColor13 = new Color("TR", "Trắng", "#FFFFFF");colorRepository.save(newColor13);
+            Color newColor2 = new Color("XL", "Xanh lục", "#00FF00");colorRepository.save(newColor2);
+            Color newColor12 = new Color("XB", "Xanh biển", "#0000FF");colorRepository.save(newColor12);
+            Color newColor5 = new Color("DO", "Đỏ", "#FF0000");colorRepository.save(newColor5);
+            Color newColor3 = new Color("BE", "Be", "#F5F5DC");colorRepository.save(newColor3);
+            Color newColor4 = new Color("NA", "Nâu", "#A0522D");colorRepository.save(newColor4);
+            Color newColor7 = new Color("TI", "Tím", "#EE82EE");colorRepository.save(newColor7);
+            Color newColor8 = new Color("VA", "Vàng", "#FFD700");colorRepository.save(newColor8);
+            Color newColor9 = new Color("XA", "Xám", "#808080");colorRepository.save(newColor9);
+            Color newColor10 = new Color("CA", "Cam", "#FFA500");colorRepository.save(newColor10);
+            Color newColor11 = new Color("HO", "Hồng", "#FFC0CB");colorRepository.save(newColor11);
+            Color newColor14 = new Color("XX", "Khác", "linear-gradient(45deg, orange , yellow, green, cyan, blue, violet)");colorRepository.save(newColor14);
         }
     }
 
@@ -89,11 +90,14 @@ public class InitialSetup {
         List<Category> categories = categoryRepository.findAll();
         if (categories.isEmpty()) {
             Category newCate1 = new Category();
-            newCate1.setCategoryName("Nam");
+            newCate1.setCategoryName("Giày nam");
+            newCate1.setSizeRange(new Category.SizeRange(39, 45));
             Category newCate2 = new Category();
-            newCate2.setCategoryName("Nữ");
+            newCate2.setCategoryName("Giàu nữ");
+            newCate2.setSizeRange(new Category.SizeRange(35, 41));
             Category newCate3 = new Category();
-            newCate3.setCategoryName("Trẻ em");
+            newCate3.setCategoryName("Giày trẻ em");
+            newCate3.setSizeRange(new Category.SizeRange(28, 34));
 
             categoryRepository.save(newCate1);
             categoryRepository.save(newCate2);
