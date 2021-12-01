@@ -59,9 +59,10 @@ public class ProductResponse {
         this.setCreatedAt(product.getCreatedAt());
     }
 
-    public void setProducts(List<Product> products) {
+    public void setProducts(List<Product> products, String colorFilter) {
         this.products = new ArrayList<>();
         for (Product product : products) {
+            if (colorFilter != null && !colorFilter.equals(product.getColor())) continue;
             String color = this.convertColorToCode(product.getColor());
             int size = product.getSize();
             this.color.add(color);

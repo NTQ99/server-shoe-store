@@ -1,7 +1,10 @@
 package shoe.store.server.services;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,10 +14,13 @@ import org.springframework.stereotype.Service;
 import shoe.store.server.models.Product;
 import shoe.store.server.models.ProductGroup;
 import shoe.store.server.models.Size;
+import shoe.store.server.payload.request.QueryRequest;
 import shoe.store.server.payload.response.ProductResponse;
 import shoe.store.server.models.Color;
 import shoe.store.server.models.Brand;
+import shoe.store.server.models.Category;
 import shoe.store.server.repositories.BrandRepository;
+import shoe.store.server.repositories.CategoryRepository;
 import shoe.store.server.repositories.ColorRepository;
 import shoe.store.server.repositories.ProductRepository;
 import shoe.store.server.repositories.SizeRepository;
@@ -33,8 +39,14 @@ public class ProductService {
     @Autowired
     private BrandRepository brandRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     public Product createProduct(Product product) {
 
+        Brand brand = new Brand();
+        brand.setName(product.getBrand());
+        this.createBrand(brand);
         return productRepository.save(product);
     }
 
@@ -42,14 +54,31 @@ public class ProductService {
         return productRepository.findById(id).orElse(null);
     }
 
-    public List<ProductResponse> groupByProductCode() {
+    public List<ProductResponse> groupByProductCode(QueryRequest queryRequest) {
         List<ProductGroup> productGroups = productRepository.findProductsGroupByProductCode();
         List<ProductResponse> responses = new ArrayList<>();
         for (ProductGroup productGroup : productGroups) {
             ProductResponse productResponse = new ProductResponse();
             productResponse.setProductInfo(productGroup.getProducts().get(0));
-            productResponse.setProducts(productGroup.getProducts());
-            responses.add(productResponse);
+            try {
+                if (queryRequest.getSearch() != null) {
+                    String search = java.net.URLDecoder.decode(queryRequest.getSearch(), "UTF-8");
+                    if (productResponse.getProductName() == null || !productResponse.getProductName().toUpperCase().contains(search.toUpperCase())) continue;
+                }
+                if (queryRequest.getBrand() != null) {
+                    String brand = java.net.URLDecoder.decode(queryRequest.getBrand(), "UTF-8");
+                    if (productResponse.getBrand() == null || !productResponse.getBrand().toUpperCase().contains(brand.toUpperCase())) continue;
+                }
+                if (queryRequest.getType() != null) {
+                    String category = java.net.URLDecoder.decode(queryRequest.getType(), "UTF-8");
+                    if (productResponse.getCategory() == null || !productResponse.getCategory().toUpperCase().contains(category.toUpperCase())) continue;
+                }
+            } catch (UnsupportedEncodingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            productResponse.setProducts(productGroup.getProducts(), queryRequest.getColor());
+            if (!productResponse.getProducts().isEmpty()) responses.add(productResponse);
         }
 
         return responses;
@@ -161,6 +190,56 @@ public class ProductService {
 
     public void deleteAllBrands() {
         brandRepository.deleteAll();
+    }
+
+    public List<Category> getAllCates() {
+        return categoryRepository.findAll();
+    }
+
+    public Category getCateByName(String name) {
+        return categoryRepository.findByCategoryName(name);
+    }
+
+    public Category createCate(Category cate) {
+        return categoryRepository.save(cate);
+    }
+
+    public void deleteCate(Category cate) {
+        categoryRepository.delete(cate);
+    }
+
+    public void deleteAllCates() {
+        categoryRepository.deleteAll();
+    }
+
+    public Map<?,?> getNumOfProductByCategory() {
+        Map<String, Integer> res = new HashMap<>();
+        List<Category> cateList = this.getAllCates();
+        for (Category cate : cateList) {
+            res.put(cate.getCategoryName(), productRepository.countByCategory(cate.getCategoryName()));
+        }
+
+        return res;
+    }
+
+    public Map<?,?> getNumOfProductByBrand() {
+        Map<String, Integer> res = new HashMap<>();
+        List<Brand> brandList = this.getAllBrands();
+        for (Brand brand : brandList) {
+            res.put(brand.getName(), productRepository.countByBrand(brand.getName()));
+        }
+
+        return res;
+    }
+
+    public Map<?,?> getNumOfProductByColor() {
+        Map<String, Integer> res = new HashMap<>();
+        List<Color> colorList = this.getAllColors();
+        for (Color color : colorList) {
+            res.put(color.getId(), productRepository.countByColor(color.getId()));
+        }
+        
+        return res;
     }
 
 }

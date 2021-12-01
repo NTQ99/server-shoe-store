@@ -1,6 +1,7 @@
 package shoe.store.server.controllers;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import shoe.store.server.models.Color;
 import shoe.store.server.models.Product;
 import shoe.store.server.payload.BasePageResponse;
 import shoe.store.server.payload.ErrorMessage;
+import shoe.store.server.payload.request.QueryRequest;
 import shoe.store.server.services.ProductService;
 
 @RestController
@@ -32,9 +34,9 @@ public class ProductController {
     }
 
     @PostMapping("/get/group")
-    public ResponseEntity<?> getGroupByProductCode() {
+    public ResponseEntity<?> getGroupByProductCode(@RequestBody QueryRequest queryRequest) {
         
-        return new ResponseEntity<>(new BasePageResponse<>(service.groupByProductCode(), ErrorMessage.StatusCode.OK.message), HttpStatus.OK);
+        return new ResponseEntity<>(new BasePageResponse<>(service.groupByProductCode(queryRequest), ErrorMessage.StatusCode.OK.message), HttpStatus.OK);
 
     }
 
@@ -110,5 +112,21 @@ public class ProductController {
     @PostMapping("/color")
     public List<Color> getAllColors() {
         return service.getAllColors();
+    }
+
+    @PostMapping("/category/count")
+    public ResponseEntity<?> getNumOfProductByCategory() {
+        BasePageResponse<Map<?,?>> response = new BasePageResponse<>(service.getNumOfProductByCategory(), ErrorMessage.StatusCode.OK.message);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @PostMapping("/brand/count")
+    public ResponseEntity<?> getNumOfProductByBrand() {
+        BasePageResponse<Map<?,?>> response = new BasePageResponse<>(service.getNumOfProductByBrand(), ErrorMessage.StatusCode.OK.message);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @PostMapping("/color/count")
+    public ResponseEntity<?> getNumOfProductByColor() {
+        BasePageResponse<Map<?,?>> response = new BasePageResponse<>(service.getNumOfProductByColor(), ErrorMessage.StatusCode.OK.message);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

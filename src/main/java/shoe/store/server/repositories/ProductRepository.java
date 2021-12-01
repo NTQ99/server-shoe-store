@@ -15,6 +15,9 @@ public interface ProductRepository extends MongoRepository<Product, String> {
     List<Product> findByProductCodeContaining(String code);
     Product findOneByProductName(String name);
     Page<Product> findByProductNameContainingIgnoreCase(String name, Pageable paging);
+    int countByCategory(String cate);
+    int countByBrand(String brand);
+    int countByColor(String color);
 
     @Aggregation(pipeline = {"{ '$group': { '_id' : '$productCode', 'products': { '$push': '$$ROOT' } } }", "{ '$sort' : { 'products.createdAt' : 1 } }" })
     List<ProductGroup> findProductsGroupByProductCode();

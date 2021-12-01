@@ -23,9 +23,6 @@
                                 <input class="btn btn-outline-primary my-2 my-sm-0" value="Search" type="submit">
                             </form>
                         </li>
-                        <li class="text-right">
-                            <a href="/search">Advanced Search</a>
-                        </li>
                     </ul>
                 </div>
                 <div class="card card-body table-responsive">
