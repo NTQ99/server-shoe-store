@@ -12,7 +12,6 @@ import shoe.store.server.models.Address;
 import shoe.store.server.models.Customer;
 import shoe.store.server.payload.BasePageResponse;
 import shoe.store.server.payload.ErrorMessage;
-import shoe.store.server.security.jwt.JwtUtils;
 import shoe.store.server.services.CustomerService;
 
 @RestController
@@ -21,11 +20,9 @@ public class CustomerController {
 
     @Autowired
     private CustomerService service;
-    @Autowired
-	private JwtUtils jwtUtils;
 
     @PostMapping("/get")
-    public ResponseEntity<?> getAll(@RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<?> getAll() {
 
         List<Customer> customers = service.getAllCustomers();
 
@@ -34,7 +31,7 @@ public class CustomerController {
     }
 
     @PostMapping("/get/{id}")
-    public ResponseEntity<?> getById(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id) {
+    public ResponseEntity<?> getById(@PathVariable("id") String id) {
 
         Customer customer = service.getCustomerById(id);
 
@@ -43,7 +40,7 @@ public class CustomerController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestHeader("Authorization") String jwt, @RequestBody Customer customerData) {
+    public ResponseEntity<?> create(@RequestBody Customer customerData) {
 
         Customer currCustomerData = service.getCustomerByPhone(customerData.getCustomerPhone());
 
@@ -57,7 +54,7 @@ public class CustomerController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<?> update(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id,
+    public ResponseEntity<?> update(@PathVariable("id") String id,
             @RequestBody Customer newCustomerData) {
 
         Customer currCustomerData = service.getCustomerById(id);
@@ -72,7 +69,7 @@ public class CustomerController {
     }
 
     @PostMapping("/create/address/{id}")
-    public ResponseEntity<?> addAddress(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id,
+    public ResponseEntity<?> addAddress(@PathVariable("id") String id,
             @RequestBody Address newAddress) {
 
         Customer currCustomerData = service.getCustomerById(id);
@@ -87,7 +84,7 @@ public class CustomerController {
     }
 
     @PostMapping("/update/address/{id}/{index}")
-    public ResponseEntity<?> updateAddress(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id, @PathVariable("index") String index,
+    public ResponseEntity<?> updateAddress(@PathVariable("id") String id, @PathVariable("index") String index,
             @RequestBody Address newAddressData) {
 
         Customer currCustomerData = service.getCustomerById(id);
@@ -102,7 +99,7 @@ public class CustomerController {
     }
 
     @PostMapping("/delete/address/{id}/{index}")
-    public ResponseEntity<?> removeAddress(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id, @PathVariable("index") String index) {
+    public ResponseEntity<?> removeAddress(@PathVariable("id") String id, @PathVariable("index") String index) {
 
         Customer currCustomerData = service.getCustomerById(id);
 
@@ -116,7 +113,7 @@ public class CustomerController {
     }
 
     @PostMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id) {
+    public ResponseEntity<?> delete(@PathVariable("id") String id) {
 
         Customer currDeliveryData = service.getCustomerById(id);
 
@@ -131,7 +128,7 @@ public class CustomerController {
     }
 
     @PostMapping("/delete")
-    public ResponseEntity<?> deleteAll(@RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<?> deleteAll() {
 
         service.deleteAllCustomers();
         BasePageResponse<Customer> response = new BasePageResponse<>(null, ErrorMessage.StatusCode.OK.message);

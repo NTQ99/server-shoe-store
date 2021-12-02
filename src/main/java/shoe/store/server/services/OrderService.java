@@ -42,6 +42,8 @@ public class OrderService {
                 throw new GlobalException("not found product with name: " + item.getProductName());
             }
             totalPrice += product.getPrice()*item.getQuantity();
+            product.setStock(product.getStock() - item.getQuantity());
+            productService.saveProduct(product);
         }
 
         Customer customerData = customerService.getCustomerByPhone(orderData.getCustomerPhone());
@@ -192,7 +194,7 @@ public class OrderService {
                 throw new GlobalException(ErrorMessage.StatusCode.OUT_OF_STOCK.message);
 
             product.setStock(product.getStock() - item.getQuantity());
-            productService.createProduct(product);
+            productService.saveProduct(product);
 
             products.add(product);
         }

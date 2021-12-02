@@ -34,7 +34,7 @@ public class ProductController {
     }
 
     @PostMapping("/get/group")
-    public ResponseEntity<?> getGroupByProductCode(@RequestBody QueryRequest queryRequest) {
+    public ResponseEntity<?> getGroupByProductCode(@RequestBody(required = false) QueryRequest queryRequest) {
         
         return new ResponseEntity<>(new BasePageResponse<>(service.groupByProductCode(queryRequest), ErrorMessage.StatusCode.OK.message), HttpStatus.OK);
 
@@ -57,7 +57,7 @@ public class ProductController {
         
         productData.validateRequest();
         
-        BasePageResponse<Product> response = new BasePageResponse<>(service.createProduct(productData), ErrorMessage.StatusCode.CREATED.message);
+        BasePageResponse<Product> response = new BasePageResponse<>(service.saveProduct(productData), ErrorMessage.StatusCode.CREATED.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
         
     }
@@ -68,13 +68,8 @@ public class ProductController {
     @RequestBody Product newProductData) {
         
         newProductData.validateRequest();
-        Product currProductData = service.getProductById(id);
 
-        if (currProductData == null) {
-            throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
-        }
-
-        BasePageResponse<Product> response = new BasePageResponse<>(service.updateProduct(currProductData, newProductData), ErrorMessage.StatusCode.MODIFIED.message);
+        BasePageResponse<Product> response = new BasePageResponse<>(service.updateProduct(id, newProductData), ErrorMessage.StatusCode.MODIFIED.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
 
     }

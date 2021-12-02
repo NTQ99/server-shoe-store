@@ -3,14 +3,18 @@ package shoe.store.server;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import shoe.store.server.controllers.AuthController;
 import shoe.store.server.models.Category;
 import shoe.store.server.models.Color;
 import shoe.store.server.models.Role;
 import shoe.store.server.models.Size;
+import shoe.store.server.models.User;
+import shoe.store.server.payload.request.RegisterRequest;
 import shoe.store.server.repositories.CategoryRepository;
 import shoe.store.server.repositories.ColorRepository;
 import shoe.store.server.repositories.RoleRepository;
 import shoe.store.server.repositories.SizeRepository;
+import shoe.store.server.repositories.UserRepository;
 
 import java.util.List;
 
@@ -23,6 +27,9 @@ public class InitialSetup {
     private RoleRepository roleRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private SizeRepository sizeRepository;
     
     @Autowired
@@ -30,6 +37,9 @@ public class InitialSetup {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private AuthController authController;
 
     @PostConstruct
     public void initRole() throws Exception {
@@ -51,6 +61,15 @@ public class InitialSetup {
         if (buyerRole == null) {
             buyerRole = new Role(Role.ERole.ROLE_BUYER);
             roleRepository.save(buyerRole);
+        }
+    }
+
+    @PostConstruct
+    public void initAdminUser() throws Exception {
+        User adminUser = userRepository.findByUsername("admin");
+        if (adminUser == null) {
+            RegisterRequest registerRequest = new RegisterRequest("admin", "admin", "admin", "admin@shoe.store.com", "Admin", "", "0", null);
+            authController.registerUser(registerRequest);
         }
     }
 

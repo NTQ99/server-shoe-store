@@ -14,9 +14,11 @@ import org.springframework.stereotype.Service;
 import shoe.store.server.models.Product;
 import shoe.store.server.models.ProductGroup;
 import shoe.store.server.models.Size;
+import shoe.store.server.payload.ErrorMessage;
 import shoe.store.server.payload.request.QueryRequest;
 import shoe.store.server.payload.response.ProductResponse;
 import shoe.store.server.models.Color;
+import shoe.store.server.exceptions.GlobalException;
 import shoe.store.server.models.Brand;
 import shoe.store.server.models.Category;
 import shoe.store.server.repositories.BrandRepository;
@@ -42,11 +44,11 @@ public class ProductService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public Product createProduct(Product product) {
+    public Product saveProduct(Product product) {
 
         Brand brand = new Brand();
         brand.setName(product.getBrand());
-        this.createBrand(brand);
+        this.saveBrand(brand);
         return productRepository.save(product);
     }
 
@@ -60,6 +62,7 @@ public class ProductService {
         for (ProductGroup productGroup : productGroups) {
             ProductResponse productResponse = new ProductResponse();
             productResponse.setProductInfo(productGroup.getProducts().get(0));
+            if (queryRequest == null) queryRequest = new QueryRequest();
             try {
                 if (queryRequest.getSearch() != null) {
                     String search = java.net.URLDecoder.decode(queryRequest.getSearch(), "UTF-8");
@@ -104,7 +107,13 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public Product updateProduct(Product productData, Product newProductData) {
+    public Product updateProduct(String id, Product newProductData) {
+
+        Product productData = this.getProductById(id);
+
+        if (productData == null) {
+            throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
+        }
 
         productData.setProductName(newProductData.getProductName());
         productData.setProductDetail(newProductData.getProductDetail());
@@ -138,7 +147,7 @@ public class ProductService {
         return sizeRepository.findByValue(value);
     }
 
-    public Size createSize(Size size) {
+    public Size saveSize(Size size) {
         return sizeRepository.save(size);
     }
 
@@ -160,7 +169,7 @@ public class ProductService {
         else return color.getValue();
     }
 
-    public Color createColor(Color color) {
+    public Color saveColor(Color color) {
         return colorRepository.save(color);
     }
 
@@ -180,7 +189,7 @@ public class ProductService {
         return brandRepository.findByName(name);
     }
 
-    public Brand createBrand(Brand brand) {
+    public Brand saveBrand(Brand brand) {
         return brandRepository.save(brand);
     }
 
@@ -200,7 +209,7 @@ public class ProductService {
         return categoryRepository.findByCategoryName(name);
     }
 
-    public Category createCate(Category cate) {
+    public Category saveCate(Category cate) {
         return categoryRepository.save(cate);
     }
 
