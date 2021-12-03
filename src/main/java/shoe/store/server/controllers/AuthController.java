@@ -124,18 +124,20 @@ public class AuthController {
         user.setLastName(registerRequest.getLastName());
         user.setPhone(phone);
 		
-		Customer customer = customerService.getCustomerByPhone(phone);
-		if (customer == null) {
-			customer = new Customer(user.getFirstName(), user.getLastName(), user.getPhone(), user.getEmail());
-		} else {
-			customer.setCustomerFirstName(user.getFirstName());
-			customer.setCustomerLastName(user.getLastName());
-			customer.setCustomerEmail(user.getEmail());
+		if (registerRole == null || registerRole == "") {
+			Customer customer = customerService.getCustomerByPhone(phone);
+			if (customer == null) {
+				customer = new Customer(user.getFirstName(), user.getLastName(), user.getPhone(), user.getEmail());
+			} else {
+				customer.setCustomerFirstName(user.getFirstName());
+				customer.setCustomerLastName(user.getLastName());
+				customer.setCustomerEmail(user.getEmail());
+			}
+			user.setCustomerCode(customer.getCustomerCode());
+			
+			customerService.createCustomer(customer);
 		}
-        user.setCustomerCode(customer.getCustomerCode());
-
 		userService.createUser(user);
-		customerService.createCustomer(customer);
 
 		BasePageResponse<?> response = new BasePageResponse<>(null, ErrorMessage.StatusCode.USER_CREATED.message);
 

@@ -61,8 +61,10 @@ public class OrderController {
     @PostMapping("/create")
     public ResponseEntity<BasePageResponse<Order>> create(@RequestHeader("Authorization") String jwt, @RequestBody Order orderData) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-        orderData.setUserId(userId);
+        if (!jwt.equals("undefined")) {
+            String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
+            orderData.setUserId(userId);
+        }
         orderData.validateRequest();
         BasePageResponse<Order> response = new BasePageResponse<>(service.createOrder(orderData), ErrorMessage.StatusCode.CREATED.message);
         return new ResponseEntity<>(response, HttpStatus.OK);

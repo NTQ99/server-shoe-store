@@ -7,24 +7,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import shoe.store.server.exceptions.GlobalException;
-import shoe.store.server.models.Customer;
 import shoe.store.server.models.Role;
 import shoe.store.server.models.User;
 import shoe.store.server.payload.BasePageResponse;
 import shoe.store.server.payload.ErrorMessage;
 import shoe.store.server.payload.request.RegisterRequest;
 import shoe.store.server.security.jwt.JwtUtils;
-import shoe.store.server.services.CustomerService;
 import shoe.store.server.services.UserService;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -37,13 +31,10 @@ public class PageViewController {
     private UserService service;
 
     @Autowired
-    private CustomerService customerService;
-
-    @Autowired
 	private JwtUtils jwtUtils;
 
     @Autowired
-	private PasswordEncoder encoder;
+    private AuthController authController;
 
     @Value("${max.result.per.page}")
     private int maxResults;
@@ -174,47 +165,13 @@ public class PageViewController {
             return "redirect:/addNewUser?error=Enter valid password";
         }
 
-        Set<Role> roles = new HashSet<>();
-        
+
         String registerRole = request.getRoleKey();
-        
-        Role userRole = new Role();
-        if (registerRole == null || registerRole == "") {
-            userRole = service.getRoleByName(Role.ERole.ROLE_BUYER);
-        } else {
-            switch (registerRole) {
-                case "admin":
-                userRole = service.getRoleByName(Role.ERole.ROLE_ADMIN);
-                break;
-                case "seller":
-                userRole = service.getRoleByName(Role.ERole.ROLE_SELLER);
-                break;
-                default:
-                return "redirect:/addNewUser?error=Select a valid Role";
-            }
+        if (!registerRole.equals(null) && !registerRole.equals("") && !registerRole.equals("admin") && !registerRole.equals("seller")){
+            return "redirect:/addNewUser?error=Select a valid Role";
         }
-        roles.add(userRole);
-
-        User dbUser = new User(request.getUsername(),encoder.encode(request.getPassword()));
-        dbUser.setRoles(roles);
-        dbUser.setFirstName(request.getFirstName());
-        dbUser.setLastName(request.getLastName());
-        dbUser.setEmail(request.getEmail());
-        dbUser.setPhone(phone);
-		
-		Customer customer = customerService.getCustomerByPhone(phone);
-		if (customer == null) {
-            customer = new Customer(dbUser.getFirstName(), dbUser.getLastName(), dbUser.getPhone(), dbUser.getEmail());
-		} else {
-            customer.setCustomerFirstName(dbUser.getFirstName());
-			customer.setCustomerLastName(dbUser.getLastName());
-			customer.setCustomerEmail(dbUser.getEmail());
-		}
-        dbUser.setCustomerCode(customer.getCustomerCode());
         
-        service.createUser(dbUser);
-        customerService.createCustomer(customer);
-
+        authController.registerUser(request);
         return result;
     }
 
