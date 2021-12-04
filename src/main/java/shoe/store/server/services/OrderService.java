@@ -42,6 +42,8 @@ public class OrderService {
                 throw new GlobalException("not found product with name: " + item.getProductName());
             }
             totalPrice += product.getPrice()*item.getQuantity();
+            if (product.getStock() < item.getQuantity())
+                throw new GlobalException(ErrorMessage.StatusCode.OUT_OF_STOCK.message);
             product.setStock(product.getStock() - item.getQuantity());
             productService.saveProduct(product);
         }
@@ -173,6 +175,17 @@ public class OrderService {
         return orderRepository.save(orderData);
     }
 
+    public Order updateOrderAddress(Order orderData, Order newOrderData) {
+
+        if (!orderData.getDeliveryTo().equals(newOrderData.getDeliveryTo())) {
+            Customer customerData = customerService.getCustomerById(orderData.getCustomerId());
+            customerService.addCustomerAddress(customerData, newOrderData.getDeliveryTo());
+            orderData.setDeliveryTo(newOrderData.getDeliveryTo());
+        }
+
+        return orderRepository.save(orderData);
+    }
+
     public void deleteOrder(String id) {
         orderRepository.deleteById(id);
     }
@@ -181,42 +194,18 @@ public class OrderService {
         orderRepository.deleteByUserId(userId);
     }
 
-    public Order sendOrder(Order order, Delivery delivery) {
+    public Order sendOrder(String id, Delivery delivery) {
 
-        List<Product> products = new ArrayList<>();
-        if (order.getProducts() == null)
-            throw new GlobalException("products not null");
-        for (Order.Item item : order.getProducts()) {
-            Product product = productService.getProductById(item.getProductId());
-            if (product == null)
-                throw new GlobalException("not found product with id: " + item.getProductId());
-            if (product.getStock() < item.getQuantity())
-                throw new GlobalException(ErrorMessage.StatusCode.OUT_OF_STOCK.message);
+        Order order = this.getOrderById(id);
 
-            product.setStock(product.getStock() - item.getQuantity());
-            productService.saveProduct(product);
-
-            products.add(product);
+        if (order == null) {
+            throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
         }
 
-        DeliveryUnit deliveryUnit = deliveryUnitService.getDeliveryUnitByName(order.getUserId(), delivery.getDeliveryUnitName());
-        if (deliveryUnit == null)
-            throw new GlobalException("delivery unit not found with name: " + order.getDeliveryUnitName());
-
-        if (deliveryUnit.getDeliveryUnitName().equals("GHN")) {
-            delivery.setRequest(products, order);
-            delivery.setTo_district_id(deliveryService.GHNGetDistrictId(deliveryUnit.getToken(),
-                    order.getDeliveryTo().getProvince(), order.getDeliveryTo().getDistrict()));
-            delivery.setTo_ward_code(deliveryService.GHNGetWardCode(deliveryUnit.getToken(),
-                    delivery.getTo_district_id(), order.getDeliveryTo().getWard()));
-            order.setDeliveryCode(
-                    deliveryService.GHNCreateOrder(deliveryUnit.getToken(), deliveryUnit.getShopId(), delivery));
-            order.setStatus(Order.Status.await_trans);
-            order.setDeliveryUnitName(delivery.getDeliveryUnitName());
-            order.setShipFee(delivery.getShipFee());
-            return orderRepository.save(order);
-        } else
-            throw new GlobalException("delivery unit unavailable");
+        order.setStatus(Order.Status.await_trans);
+        order.setDeliveryUnitName(delivery.getDeliveryUnitName());
+        order.setShipFee(delivery.getShipFee());
+        return orderRepository.save(order);
     }
 
     public void updateOrderStatus(Order order, String status) {

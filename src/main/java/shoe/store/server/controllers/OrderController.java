@@ -87,22 +87,16 @@ public class OrderController {
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<BasePageResponse<Order>> update(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id,
+    public ResponseEntity<BasePageResponse<Order>> update(@PathVariable("id") String id,
             @RequestBody Order newOrderData) {
-
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
 
         Order currOrderData = service.getOrderById(id);
 
         if (currOrderData == null) {
             throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
         }
-        
-        if (!currOrderData.validateUser(userId)) {
-            throw new GlobalException(ErrorMessage.StatusCode.UNAUTHORIZED.message);
-        }
 
-        BasePageResponse<Order> response = new BasePageResponse<>(service.updateOrder(currOrderData, newOrderData), ErrorMessage.StatusCode.MODIFIED.message);
+        BasePageResponse<Order> response = new BasePageResponse<>(service.updateOrderAddress(currOrderData, newOrderData), ErrorMessage.StatusCode.MODIFIED.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
 
     }
@@ -134,40 +128,22 @@ public class OrderController {
     }
 
     @PostMapping("/delivery/{id}")
-    public ResponseEntity<BasePageResponse<Order>> sendOrder(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id,
+    public ResponseEntity<BasePageResponse<Order>> sendOrder(@PathVariable("id") String id,
             @RequestBody Delivery delivery) {
 
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
-        Order order = service.getOrderById(id);
-
-        if (order == null) {
-            throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
-        }
-
-        if (!order.validateUser(userId)) {
-            throw new GlobalException(ErrorMessage.StatusCode.UNAUTHORIZED.message);
-        }
-
-        BasePageResponse<Order> response = new BasePageResponse<>(service.sendOrder(order, delivery), ErrorMessage.StatusCode.OK.message);
+        BasePageResponse<Order> response = new BasePageResponse<>(service.sendOrder(id, delivery), ErrorMessage.StatusCode.OK.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
 
     }
 
     @PostMapping("/update/status/{id}")
-    public ResponseEntity<BasePageResponse<?>> updateStatus(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id,
+    public ResponseEntity<BasePageResponse<?>> updateStatus(@PathVariable("id") String id,
             @RequestBody(required = false) Object request) {
-
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
 
         Order order = service.getOrderById(id);
 
         if (order == null) {
             throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
-        }
-
-        if (!order.validateUser(userId)) {
-            throw new GlobalException(ErrorMessage.StatusCode.UNAUTHORIZED.message);
         }
 
         if (request == null) {
