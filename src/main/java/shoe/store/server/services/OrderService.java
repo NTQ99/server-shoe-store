@@ -211,6 +211,13 @@ public class OrderService {
     public void updateOrderStatus(Order order, String status) {
 
         if (status != null) {
+            if (status.equals("canceled") || status.equals("fail")) {
+                for (Order.Item item : order.getProducts()) {
+                    Product product = productService.getProductById(item.getProductId());
+                    product.setStock(product.getStock() + item.getQuantity());
+                    productService.saveProduct(product);
+                }
+            }
             order.setStatus(Order.Status.valueOf(status));
             orderRepository.save(order);
             return;
