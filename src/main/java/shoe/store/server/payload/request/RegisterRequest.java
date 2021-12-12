@@ -25,5 +25,6 @@ public class RegisterRequest {
     private String firstName;
     private String lastName;
     private String phone;
+    private String birthday;
     private Address address;
 }

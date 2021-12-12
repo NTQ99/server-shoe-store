@@ -22,13 +22,13 @@ public class ControllerExceptionHandler {
         ex.getMessage(),
         request.getDescription(false));
     
-    return new ResponseEntity<ErrorMessage>(message, HttpStatus.OK);
+    return new ResponseEntity<ErrorMessage>(message, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(GlobalException.class)
   public ResponseEntity<BasePageResponse<?>> globalExceptionHandler(GlobalException ex, WebRequest request) {
     BasePageResponse<?> response = new BasePageResponse<>(ex, request);
     
-    return new ResponseEntity<>(response, HttpStatus.OK);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 }

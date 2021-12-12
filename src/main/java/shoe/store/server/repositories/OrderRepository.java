@@ -18,5 +18,6 @@ public interface OrderRepository extends MongoRepository<Order, String> {
     Page<Order> findByCustomerNameContainingIgnoreCaseAndStatus(String name, String status, Pageable paging);
     Page<Order> findByCustomerPhoneContainingAndStatus(String phone, String status, Pageable paging);
     Page<Order> findByCreatedAtBetween(String createdAtFrom, String createdAtTo, Pageable paging);
+    int countByStatus(Order.Status status);
     void deleteByUserId(String userId);
 }

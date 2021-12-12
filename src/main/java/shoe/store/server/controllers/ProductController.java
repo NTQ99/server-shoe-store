@@ -51,6 +51,12 @@ public class ProductController {
         }
     }
 
+    @PostMapping("/get-top/{num}")
+    public ResponseEntity<?> getTop(@PathVariable("num") int num) {
+
+        return new ResponseEntity<>(new BasePageResponse<>(service.getTopProduct(num), ErrorMessage.StatusCode.OK.message), HttpStatus.OK);
+    }
+
     @PostMapping("/create")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SELLER')")
     public ResponseEntity<?> create(@RequestBody Product productData) {

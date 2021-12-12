@@ -78,6 +78,18 @@ public class AuthController {
 		}
 	}
 
+	@PostMapping("/changepass")
+	public ResponseEntity<BasePageResponse<?>> changePassword(@Valid @RequestBody LoginRequest changeRequest) {
+		User user = userService.getUserByUsername(changeRequest.getUsername());
+		if (user == null) {
+			throw new GlobalException(ErrorMessage.StatusCode.USER_NOT_FOUND.message);
+		}
+		this.authenticateUser(changeRequest);
+		user.setPassword(encoder.encode(changeRequest.getNewPassword()));
+		userService.createUser(user);
+		return ResponseEntity.ok(new BasePageResponse<>(null, ErrorMessage.StatusCode.USER_MODIFIED.message));
+	}
+
 	@PostMapping("/register")
 	public ResponseEntity<BasePageResponse<?>> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
 		if (userService.checkUserExists(registerRequest.getUsername())) {
@@ -128,10 +140,12 @@ public class AuthController {
 			Customer customer = customerService.getCustomerByPhone(phone);
 			if (customer == null) {
 				customer = new Customer(user.getFirstName(), user.getLastName(), user.getPhone(), user.getEmail());
+				customer.setCustomerBirth(registerRequest.getBirthday());
 			} else {
 				customer.setCustomerFirstName(user.getFirstName());
 				customer.setCustomerLastName(user.getLastName());
 				customer.setCustomerEmail(user.getEmail());
+				customer.setCustomerBirth(registerRequest.getBirthday());
 			}
 			user.setCustomerCode(customer.getCustomerCode());
 			

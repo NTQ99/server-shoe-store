@@ -68,7 +68,7 @@ public class InitialSetup {
     public void initAdminUser() throws Exception {
         User adminUser = userRepository.findByUsername("admin");
         if (adminUser == null) {
-            RegisterRequest registerRequest = new RegisterRequest("admin", "admin", "admin", "admin@shoe.store.com", "Admin", "", "0", null);
+            RegisterRequest registerRequest = new RegisterRequest("admin", "admin", "admin", "admin@shoe.store.com", "Admin", "", "0", null, null);
             authController.registerUser(registerRequest);
         }
     }

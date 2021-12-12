@@ -2,9 +2,14 @@ package shoe.store.server.services;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,6 +23,7 @@ import shoe.store.server.payload.ErrorMessage;
 import shoe.store.server.payload.request.QueryRequest;
 import shoe.store.server.payload.response.ProductResponse;
 import shoe.store.server.models.Color;
+import shoe.store.server.models.Order;
 import shoe.store.server.exceptions.GlobalException;
 import shoe.store.server.models.Brand;
 import shoe.store.server.models.Category;
@@ -43,12 +49,18 @@ public class ProductService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+    
+    @Autowired
+    private OrderService orderService;
 
     public Product saveProduct(Product product) {
 
-        Brand brand = new Brand();
-        brand.setName(product.getBrand());
-        this.saveBrand(brand);
+        Brand brand = this.getBrandByValue(product.getBrand());
+        if (brand == null) {
+            brand = new Brand();
+            brand.setName(product.getBrand());
+            this.saveBrand(brand);
+        }
         return productRepository.save(product);
     }
 
@@ -248,6 +260,41 @@ public class ProductService {
             res.put(color.getId(), productRepository.countByColor(color.getId()));
         }
         
+        return res;
+    }
+
+    public List<Map<String,?>> getTopProduct(int num) {
+        List<Map<String,?>> res = new ArrayList<>();
+        Map<String,Integer> cntTop = new HashMap<>();
+        List<Order> orders = orderService.getAllOrders();
+        ObjectMapper oMapper = new ObjectMapper();
+        for (Order order : orders) {
+            if (order.getStatus().equals(Order.Status.canceled) || order.getStatus().equals(Order.Status.fail)) continue;
+            for (Order.Item item : order.getProducts()) {
+                if (cntTop.containsKey(item.getProductId())) {
+                    cntTop.replace(item.getProductId(), cntTop.get(item.getProductId()) + item.getQuantity());
+                } else {
+                    cntTop.put(item.getProductId(), item.getQuantity());
+                }
+            }
+        }
+
+        Map<String,Integer> topId =
+        cntTop.entrySet().stream()
+            .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+            .limit(num)
+            .collect(Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+
+        List<String> idList = new ArrayList<String>(topId.keySet());
+        for (String productId : idList) {
+            Product product = productRepository.findById(productId).orElse(null);
+            if (product != null) {
+                Map<String, Object> resMap = oMapper.convertValue(product, Map.class);
+                resMap.put("numOfPrtsSold", cntTop.get(productId));
+                res.add(resMap);
+            }
+        }
         return res;
     }
 

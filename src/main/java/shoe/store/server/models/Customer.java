@@ -26,6 +26,7 @@ public class Customer {
     private String customerName;
     private int customerGender; //0: khác 1: nam 2: nữ
     private String customerPhone;
+    private String customerBirth;
     private String customerEmail;
     private String customerFacebook;
     private int defaultAddressId;

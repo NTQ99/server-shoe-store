@@ -65,6 +65,7 @@ public class CustomerService {
         customerData.setCustomerGender(newCustomerData.getCustomerGender());
         customerData.setCustomerPhone(newCustomerData.getCustomerPhone());
         customerData.setCustomerEmail(newCustomerData.getCustomerEmail());
+        customerData.setCustomerBirth(newCustomerData.getCustomerBirth());
         customerData.setCustomerFacebook(newCustomerData.getCustomerFacebook());
         customerData.setCustomerAddresses(newCustomerData.getCustomerAddresses());
         customerData.setDefaultAddressId(newCustomerData.getDefaultAddressId());

@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.*;
 import shoe.store.server.exceptions.GlobalException;
 import shoe.store.server.models.Delivery;
 import shoe.store.server.models.Order;
+import shoe.store.server.models.Product;
 import shoe.store.server.payload.BasePageResponse;
 import shoe.store.server.payload.ErrorMessage;
 import shoe.store.server.security.jwt.JwtUtils;
 import shoe.store.server.services.OrderService;
+import shoe.store.server.services.ProductService;
 
 @RestController
 @RequestMapping("/api/order")
@@ -27,6 +29,9 @@ public class OrderController {
 
     @Autowired
     private OrderService service;
+
+    @Autowired
+    private ProductService productService;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -41,9 +46,22 @@ public class OrderController {
     }
 
     @PostMapping("/get/{id}")
-    public ResponseEntity<BasePageResponse<Order>> getById(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id) {
+    public ResponseEntity<BasePageResponse<Order>> getById(@PathVariable("id") String id, @RequestBody(required = false) String phone) {
 
         Order order = service.getOrderById(id);
+
+        if (order == null) {
+            order = service.getOrderByCode(id);
+        }
+
+        if (order == null || phone == null || (order != null && phone != null && !order.getCustomerPhone().equals(phone))) {
+            return new ResponseEntity<>(new BasePageResponse<>(null, ErrorMessage.StatusCode.NOT_FOUND.message), HttpStatus.OK);
+        }
+
+        for (Order.Item item : order.getProducts()) {
+            Product product = productService.getProductById(item.getProductId());
+            item.setProductId(Double.toString(product.getPrice()));
+        }
 
         return new ResponseEntity<>(new BasePageResponse<>(order, ErrorMessage.StatusCode.OK.message), HttpStatus.OK);
 
@@ -55,6 +73,13 @@ public class OrderController {
         List<Order> orders = service.getOrderByCustomerId(id);
 
         return new ResponseEntity<>(new BasePageResponse<>(orders, ErrorMessage.StatusCode.OK.message), HttpStatus.OK);
+
+    }
+
+    @PostMapping("/get-report")
+    public ResponseEntity<BasePageResponse<?>> getReport() {
+
+        return new ResponseEntity<>(new BasePageResponse<>(service.getReport(), ErrorMessage.StatusCode.OK.message), HttpStatus.OK);
 
     }
 

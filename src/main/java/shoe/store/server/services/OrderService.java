@@ -132,6 +132,20 @@ public class OrderService {
         }
     }
 
+    public List<Integer> getReport() {
+        List<Integer> res = new ArrayList<>();
+        int numOfSuccess = orderRepository.countByStatus(Order.Status.success);
+        int numOfFail = orderRepository.countByStatus(Order.Status.fail) + orderRepository.countByStatus(Order.Status.canceled);
+        int numOfAwait = orderRepository.countByStatus(Order.Status.await_trans);
+        int numOfOther = orderRepository.countByStatus(Order.Status.not_responded) + orderRepository.countByStatus(Order.Status.wait_confirm);
+
+        res.add(numOfSuccess);
+        res.add(numOfFail);
+        res.add(numOfAwait);
+        res.add(numOfOther);
+        return res;
+    }
+
     public Order updateOrder(Order orderData, Order newOrderData) {
 
         if (!orderData.getCustomerPhone().equals(newOrderData.getCustomerPhone())) {
