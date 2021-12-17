@@ -31,6 +31,10 @@ public class UserService {
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+    
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
 
     public Page<User> findUserByUsername(String username, Pageable pagging) {
         return userRepository.findByUsernameContaining(username, pagging);
@@ -76,6 +80,10 @@ public class UserService {
 
     public Boolean checkUserExists(String username) {
         return userRepository.existsByUsername(username);
+    }
+
+    public Boolean checkEmailExists(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     public Boolean checkPhoneExists(String phone) {

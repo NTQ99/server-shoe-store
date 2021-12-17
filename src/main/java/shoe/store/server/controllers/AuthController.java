@@ -78,22 +78,49 @@ public class AuthController {
 		}
 	}
 
-	@PostMapping("/changepass")
-	public ResponseEntity<BasePageResponse<?>> changePassword(@Valid @RequestBody LoginRequest changeRequest) {
-		User user = userService.getUserByUsername(changeRequest.getUsername());
+	@PostMapping("/updatepass")
+	public ResponseEntity<BasePageResponse<?>> updatePassword(@Valid @RequestBody LoginRequest updateRequest) {
+		User user = userService.getUserByUsername(updateRequest.getUsername());
 		if (user == null) {
 			throw new GlobalException(ErrorMessage.StatusCode.USER_NOT_FOUND.message);
 		}
-		this.authenticateUser(changeRequest);
-		user.setPassword(encoder.encode(changeRequest.getNewPassword()));
+		this.authenticateUser(updateRequest);
+		user.setPassword(encoder.encode(updateRequest.getNewPassword()));
 		userService.createUser(user);
 		return ResponseEntity.ok(new BasePageResponse<>(null, ErrorMessage.StatusCode.USER_MODIFIED.message));
+	}
+
+	@PostMapping("/resetpass")
+	public ResponseEntity<BasePageResponse<?>> resetPassword(@Valid @RequestBody RegisterRequest resetRequest) {
+		User user = userService.getUserByEmail(resetRequest.getEmail());
+		if (user == null) {
+			throw new GlobalException(ErrorMessage.StatusCode.USER_NOT_FOUND.message);
+		}
+		user.setPassword(encoder.encode(resetRequest.getPassword()));
+		userService.createUser(user);
+		return ResponseEntity.ok(new BasePageResponse<>(null, ErrorMessage.StatusCode.USER_MODIFIED.message));
+	}
+
+	@PostMapping("/validate")
+	public ResponseEntity<BasePageResponse<?>> validateEmail(@Valid @RequestBody RegisterRequest resetRequest) {
+		User user = userService.getUserByUsername(resetRequest.getUsername());
+		if (user == null) {
+			throw new GlobalException(ErrorMessage.StatusCode.USER_NOT_FOUND.message);
+		}
+		if (!user.getEmail().equals(resetRequest.getEmail())) {
+			throw new GlobalException(ErrorMessage.StatusCode.EMAIL_INVALID.message);
+		}
+		return ResponseEntity.ok(new BasePageResponse<>(null, ErrorMessage.StatusCode.OK.message));
 	}
 
 	@PostMapping("/register")
 	public ResponseEntity<BasePageResponse<?>> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
 		if (userService.checkUserExists(registerRequest.getUsername())) {
 			throw new GlobalException(ErrorMessage.StatusCode.USER_EXIST.message);
+		}
+
+		if (userService.checkEmailExists(registerRequest.getEmail())) {
+			throw new GlobalException(ErrorMessage.StatusCode.EMAIL_EXIST.message);
 		}
 
 		String phone = registerRequest.getPhone();
@@ -135,6 +162,7 @@ public class AuthController {
         user.setFirstName(registerRequest.getFirstName());
         user.setLastName(registerRequest.getLastName());
         user.setPhone(phone);
+		user.setEmailVerified(false);
 		
 		if (registerRole == null || registerRole == "") {
 			Customer customer = customerService.getCustomerByPhone(phone);
