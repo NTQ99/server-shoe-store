@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <head>
@@ -20,14 +20,14 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-                <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                <a class="nav-link" href="/">Trang chủ <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item active">
-                <a class="nav-link" href="/addNewUser">Add User</a>
+                <a class="nav-link" href="/addNewUser">Tạo User</a>
             </li>
         </ul>
         <div >
-            <a style="text-align: right; color: #fff;" href="<c:url value="logout" />" onclick="logout()" >Logout <i class="fa fa-sign-out fa-lg"></i>
+            <a style="text-align: right; color: #fff;" href="<c:url value="logout" />" onclick="logout()" >Đăng xuất <i class="fa fa-sign-out fa-lg"></i>
 
             </a>
         </div>

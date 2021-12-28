@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
@@ -12,7 +12,7 @@
         <div class="row justify-content-md-center">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="text-center">Only Admins can Perform operations</h4>
+                    <h4 class="text-center">Chỉ tài khoản Quản Trị Viên mới có quyền truy cập!</h4>
                 </div>
                 <div class="card card-body table-responsive">
                 </div>
