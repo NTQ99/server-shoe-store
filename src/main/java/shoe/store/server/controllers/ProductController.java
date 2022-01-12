@@ -51,6 +51,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SELLER')")
     @PostMapping("/get-top/{num}")
     public ResponseEntity<?> getTop(@PathVariable("num") int num) {
 

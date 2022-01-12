@@ -96,21 +96,6 @@ public class OrderController {
 
     }
 
-    /**
-     * 
-     * @param userId id của tài khoản sở hữu
-     * @param orderData Thông tin đơn hàng
-     * @return Thông tin đơn hàng đã tạo
-     */
-    @PostMapping("/create/{idUser}")
-    public ResponseEntity<BasePageResponse<Order>> openAPICreate(@PathVariable("idUser") String userId, @RequestBody Order orderData) {
-
-        orderData.setUserId(userId);
-        BasePageResponse<Order> response = new BasePageResponse<>(service.createOrder(orderData), ErrorMessage.StatusCode.CREATED.message);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-
-    }
-
     @PostMapping("/update/{id}")
     public ResponseEntity<BasePageResponse<Order>> update(@PathVariable("id") String id,
             @RequestBody Order newOrderData) {
@@ -163,7 +148,7 @@ public class OrderController {
 
     @PostMapping("/update/status/{id}")
     public ResponseEntity<BasePageResponse<?>> updateStatus(@PathVariable("id") String id,
-            @RequestBody(required = false) Object request) {
+            @RequestBody(required = false) String status) {
 
         Order order = service.getOrderById(id);
 
@@ -171,68 +156,8 @@ public class OrderController {
             throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
         }
 
-        if (request == null) {
-            service.updateOrderStatus(order, null);
-        } else {
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, String> map = objectMapper.convertValue(request, new TypeReference<Map<String, String>>() {});
-            service.updateOrderStatus(order, map.get("status"));
-        }
+        service.updateOrderStatus(order, status);
         BasePageResponse<?> response = new BasePageResponse<>(null, ErrorMessage.StatusCode.OK.message);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-
-    }
-
-    @PostMapping("/delivery/print/{id}")
-    public ResponseEntity<BasePageResponse<String>> printOrder(@RequestHeader("Authorization") String jwt, @PathVariable("id") String id) {
-
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
-        Order order = service.getOrderById(id);
-
-        if (order == null) {
-            throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
-        }
-
-        if (!order.validateUser(userId)) {
-            throw new GlobalException(ErrorMessage.StatusCode.UNAUTHORIZED.message);
-        }
-
-        BasePageResponse<String> response = new BasePageResponse<>(service.getPrintOrdersLink(Arrays.asList(order)),
-                ErrorMessage.StatusCode.OK.message);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-
-    }
-
-    @PostMapping("/delivery/print")
-    public ResponseEntity<BasePageResponse<String>> printAllOrder(@RequestHeader("Authorization") String jwt, @RequestBody(required = false) Object request) {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, String> map = objectMapper.convertValue(request, new TypeReference<Map<String, String>>() {});
-        String type = map.get("type");
-
-        List<Order> orders = service.getAllOrders();
-
-        if (orders == null) {
-            throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
-        }
-
-        orders = orders.stream()
-                .filter(order -> order.getStatus().equals(Order.Status.await_trans))
-                .collect(Collectors.toList());
-                
-        if (type == "new") {
-            orders = orders.stream()
-                .filter(order -> !order.isPrinted())
-                .collect(Collectors.toList());
-        }
-
-        if (orders.isEmpty()) {
-            throw new GlobalException("Tất cả các đơn hàng đã được in phiếu!");
-        }
-
-        BasePageResponse<String> response = new BasePageResponse<>(service.getPrintOrdersLink(orders),
-                ErrorMessage.StatusCode.OK.message);
         return new ResponseEntity<>(response, HttpStatus.OK);
 
     }

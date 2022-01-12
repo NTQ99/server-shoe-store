@@ -43,30 +43,6 @@ public class CartController {
         
     }
 
-    @PostMapping(value={"/update", "/update/{index}"})
-    public ResponseEntity<?> updateItemCart(@RequestHeader("Authorization") String jwt, @RequestBody Cart.CartItem item, @PathVariable(required = false, name = "index") String index) {
-
-        String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-
-        Cart cartData = service.getCartByUserId(userId);
-        Cart newCart = null;
-        if (cartData == null) {
-            cartData = new Cart(userId);
-            cartData.addCartItem(item);
-            newCart = service.createCart(cartData);
-        } else {
-            if (index == null) newCart = service.addProductToCart(cartData, item);
-            else {
-                int i = Integer.parseInt(index);
-                newCart = service.updateProductToCartByIndex(cartData, i, item.getQuantity());
-            }
-        }
-        
-        BasePageResponse<Cart> response = new BasePageResponse<>(newCart, ErrorMessage.StatusCode.OK.message);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-        
-    }
-
     @PostMapping("/updateall")
     public ResponseEntity<?> updateCart(@RequestHeader("Authorization") String jwt, @RequestBody List<Cart.CartItem> items) {
 

@@ -224,39 +224,16 @@ public class OrderService {
 
     public void updateOrderStatus(Order order, String status) {
 
-        if (status != null) {
-            if (status.equals("canceled") || status.equals("fail")) {
-                for (Order.Item item : order.getProducts()) {
-                    Product product = productService.getProductById(item.getProductId());
-                    product.setStock(product.getStock() + item.getQuantity());
-                    productService.saveProduct(product);
-                }
+        if (status.equals("canceled") || status.equals("fail")) {
+            for (Order.Item item : order.getProducts()) {
+                Product product = productService.getProductById(item.getProductId());
+                product.setStock(product.getStock() + item.getQuantity());
+                productService.saveProduct(product);
             }
-            order.setStatus(Order.Status.valueOf(status));
-            orderRepository.save(order);
-            return;
         }
-
-        DeliveryUnit deliveryUnit = deliveryUnitService.getDeliveryUnitByName(order.getUserId(), order.getDeliveryUnitName());
-        if (deliveryUnit == null)
-            throw new GlobalException("delivery unit not found with name: " + order.getDeliveryUnitName());
-        
-        if (deliveryUnit.getDeliveryUnitName().equals("GHN")) {
-            String newStatus = deliveryService.GHNGetStatus(deliveryUnit.getToken(), deliveryUnit.getShopId(), order.getDeliveryCode());
-            switch (newStatus) {
-                case "cancel":
-                    order.setStatus(Order.Status.canceled);
-                    break;
-                case "returned":
-                    order.setStatus(Order.Status.fail);
-                    break;
-                default:
-                    order.setStatus(Order.Status.await_trans);
-                    break;
-            }
-            orderRepository.save(order);
-        } else
-            throw new GlobalException("delivery unit unavailable");
+        order.setStatus(Order.Status.valueOf(status));
+        orderRepository.save(order);
+        return;
     }
 
     public String getPrintOrdersLink(List<Order> orders) {
