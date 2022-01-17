@@ -87,8 +87,11 @@ public class OrderController {
     public ResponseEntity<BasePageResponse<Order>> create(@RequestHeader("Authorization") String jwt, @RequestBody Order orderData) {
 
         if (!jwt.equals("undefined")) {
-            String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
-            orderData.setUserId(userId);
+            String headerJwt = jwtUtils.getHeaderFromJwtToken(jwt.substring(7, jwt.length()));
+            if (!(headerJwt.contains("ADMIN") || headerJwt.contains("SELLER"))) {
+                String userId = jwtUtils.getIdFromJwtToken(jwt.substring(7, jwt.length()));
+                orderData.setUserId(userId);
+            }
         }
         orderData.validateRequest();
         BasePageResponse<Order> response = new BasePageResponse<>(service.createOrder(orderData), ErrorMessage.StatusCode.CREATED.message);

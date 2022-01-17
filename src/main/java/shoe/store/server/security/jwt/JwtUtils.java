@@ -28,6 +28,7 @@ public class JwtUtils {
 		return Jwts.builder()
 				.setId(userPrincipal.getId())
 				.setSubject((userPrincipal.getUsername()))
+				.setHeaderParam("roles", userPrincipal.getAuthorities())
 				.setIssuedAt(new Date())
 				.setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
 				.signWith(SignatureAlgorithm.HS512, jwtSecret)
@@ -39,8 +40,11 @@ public class JwtUtils {
 	}
 
 	public String getIdFromJwtToken(String token) {
-		Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
 		return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getId();
+	}
+
+	public String getHeaderFromJwtToken(String token) {
+		return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getHeader().toString();
 	}
 
 	public boolean validateJwtToken(String authToken) {

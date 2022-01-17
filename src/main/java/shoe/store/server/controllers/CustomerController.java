@@ -57,10 +57,18 @@ public class CustomerController {
     public ResponseEntity<?> update(@PathVariable("id") String id,
             @RequestBody Customer newCustomerData) {
 
+        newCustomerData.validateRequest();
         Customer currCustomerData = service.getCustomerById(id);
 
         if (currCustomerData == null) {
             throw new GlobalException(ErrorMessage.StatusCode.NOT_FOUND.message);
+        }
+        if (!currCustomerData.getCustomerPhone().equals(newCustomerData.getCustomerPhone())) {
+
+            Customer newCustomerDataObj = service.getCustomerByPhone(newCustomerData.getCustomerPhone());
+            if (newCustomerDataObj != null) {
+                throw new GlobalException(ErrorMessage.StatusCode.PHONE_EXIST.message);
+            }
         }
         
         BasePageResponse<Customer> response = new BasePageResponse<>(service.updateCustomer(currCustomerData, newCustomerData), ErrorMessage.StatusCode.MODIFIED.message);

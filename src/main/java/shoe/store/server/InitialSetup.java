@@ -112,7 +112,7 @@ public class InitialSetup {
             newCate1.setCategoryName("Giày nam");
             newCate1.setSizeRange(new Category.SizeRange(39, 45));
             Category newCate2 = new Category();
-            newCate2.setCategoryName("Giàu nữ");
+            newCate2.setCategoryName("Giày nữ");
             newCate2.setSizeRange(new Category.SizeRange(35, 41));
             Category newCate3 = new Category();
             newCate3.setCategoryName("Giày trẻ em");

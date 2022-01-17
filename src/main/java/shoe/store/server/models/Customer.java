@@ -85,8 +85,11 @@ public class Customer {
     }
 
     public void validateRequest() {
-        if (this.getCustomerPhone() == null) throw new GlobalException("customer phone not null");
-        if (this.getCustomerFirstName() == null) throw new GlobalException("customer first name not null");
-        if (this.getCustomerLastName() == null) throw new GlobalException("customer last name not null");
+        if (this.getCustomerPhone() == null) throw new GlobalException("Số điện thoại không được để trống!");
+
+        String phone = this.getCustomerPhone();
+		if (this.getCustomerPhone().startsWith("+84")) phone = this.getCustomerPhone().substring(3);
+		if (phone != null && phone != "" && !phone.startsWith("0")) phone = "0" + phone;
+        this.setCustomerPhone(phone);
     }
 }

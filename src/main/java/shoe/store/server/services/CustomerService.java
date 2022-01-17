@@ -9,12 +9,16 @@ import org.springframework.stereotype.Service;
 
 import shoe.store.server.models.Address;
 import shoe.store.server.models.Customer;
+import shoe.store.server.models.User;
 import shoe.store.server.repositories.CustomerRepository;
 
 @Service("customerService")
 public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private UserService userService;
 
     public Customer createCustomer(Customer customer) {
         if (customer.getCustomerName() == null || customer.getCustomerName() == "") {
@@ -69,6 +73,12 @@ public class CustomerService {
         customerData.setCustomerFacebook(newCustomerData.getCustomerFacebook());
         customerData.setCustomerAddresses(newCustomerData.getCustomerAddresses());
         customerData.setDefaultAddressId(newCustomerData.getDefaultAddressId());
+        
+        User user = userService.getUserByEmail(customerData.getCustomerEmail());
+        user.setFirstName(newCustomerData.getCustomerFirstName());
+        user.setLastName(newCustomerData.getCustomerLastName());
+        user.setPhone(newCustomerData.getCustomerPhone());
+        userService.updateUser(user.getId(), user);
 
         return customerRepository.save(customerData);
     }
